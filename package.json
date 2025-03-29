@@ -41,8 +41,14 @@
         "title": "Presentation: Save Code Snapshot"
       },
       {
+        "command": "presentationSnapshots.loadSnapshot",
+        "title": "Load Snapshot",
+        "icon": "$(play)"
+      },
+      {
         "command": "presentationSnapshots.deleteSnapshot",
-        "title": "Delete Snapshot"
+        "title": "Delete Snapshot",
+        "icon": "$(trash)"
       },
       {
         "command": "presentationSnapshots.exportSnapshots",
@@ -72,9 +78,14 @@
     "menus": {
       "view/item/context": [
         {
+          "command": "presentationSnapshots.loadSnapshot",
+          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "group": "inline@1"
+        },
+        {
           "command": "presentationSnapshots.deleteSnapshot",
           "when": "view == presentationSnapshotsView && viewItem == snapshot",
-          "group": "inline"
+          "group": "inline@2"
         }
       ],
       "view/title": [

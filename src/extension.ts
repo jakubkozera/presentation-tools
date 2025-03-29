@@ -367,11 +367,6 @@ export function activate(context: vscode.ExtensionContext) {
     getTreeItem(element: Snapshot): vscode.TreeItem {
       const item = new vscode.TreeItem(element.description);
       item.tooltip = new Date(element.timestamp).toLocaleString();
-      item.command = {
-        command: 'presentationSnapshots.loadSnapshot',
-        title: 'Load Snapshot',
-        arguments: [element]
-      };
       item.contextValue = 'snapshot';
       return item;
     }
