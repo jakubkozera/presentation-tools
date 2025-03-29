@@ -43,14 +43,14 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
       throw new Error('Failed to create temporary files for diff view');
     }
     
-    // Open diff editor with the temp files
+    // Open diff editor with the temp files - swapped order to put current on left
     const currentUri = vscode.Uri.file(currentTempFile);
     const snapshotUri = vscode.Uri.file(snapshotTempFile);
     
     await vscode.commands.executeCommand('vscode.diff',
-      snapshotUri, // Right side (snapshot)
       currentUri,  // Left side (current)
-      `Snapshot: ${snapshot.description} ↔ Current`
+      snapshotUri, // Right side (snapshot)
+      `Current ↔ Snapshot: ${snapshot.description}`
     );
 
     // Show option to load this snapshot after viewing diff
