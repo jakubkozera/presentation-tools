@@ -20,17 +20,48 @@ export const fileSnapshots: FileSnapshots = {};
  * @param message The message to display
  */
 export function showTemporaryMessage(message: string): void {
-  const notification = vscode.window.showInformationMessage(message);
+  // Create and show message using the VS Code API's built-in hide functionality
+  const messageController = new TemporaryMessageController();
+  messageController.showMessage(message);
+}
+
+/**
+ * Class to handle auto-dismissing messages
+ * Uses the VS Code message controller pattern to create messages that auto-dismiss
+ */
+class TemporaryMessageController {
+  private readonly DISMISS_TIMEOUT = 2000; // 2 seconds
+  private messageDisposable: vscode.Disposable | null = null;
   
-  // Set a timeout to hide the notification after 2 seconds
-  setTimeout(() => {
-    notification.then(item => {
-      // The `item` will be undefined if the notification is still visible and hasn't been clicked.
-      // In this case, we want to dismiss it. If it's already gone (clicked), we don't need to do anything.
-      if (item === undefined) {
-        // Use the internal dispose method to close the notification
-        (notification as any).dispose?.();
-      }
+  /**
+   * Shows a temporary message that auto-dismisses
+   */
+  public showMessage(text: string): void {
+    // Clear any existing message
+    this.hideMessage();
+    
+    // Show the message without any actions
+    vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: text,
+      cancellable: false
+    }, async (progress) => {
+      // Return a promise that resolves after DISMISS_TIMEOUT
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, this.DISMISS_TIMEOUT);
+      });
     });
-  }, 2000);
+  }
+  
+  /**
+   * Hides any currently displayed message
+   */
+  private hideMessage(): void {
+    if (this.messageDisposable) {
+      this.messageDisposable.dispose();
+      this.messageDisposable = null;
+    }
+  }
 }
