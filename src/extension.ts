@@ -85,16 +85,22 @@ export function activate(context: vscode.ExtensionContext) {
       
       // Handle removals first (delete characters)
       if (diff.removed) {
-        const startPos = editor.document.positionAt(currentOffset);
-        const endPos = editor.document.positionAt(currentOffset + diff.value.length);
-        const deleteRange = new vscode.Range(startPos, endPos);
+        // Remove characters one by one, from last to first
+        for (let i = diff.value.length - 1; i >= 0; i--) {
+          const startPos = editor.document.positionAt(currentOffset + i);
+          const endPos = editor.document.positionAt(currentOffset + i + 1);
+          const deleteRange = new vscode.Range(startPos, endPos);
+          
+          // Create and apply edit to remove a single character
+          const edit = new vscode.WorkspaceEdit();
+          edit.delete(editor.document.uri, deleteRange);
+          await vscode.workspace.applyEdit(edit);
+          
+          // Add delay between character deletions for typing effect
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
         
-        // Create and apply edit to remove text
-        const edit = new vscode.WorkspaceEdit();
-        edit.delete(editor.document.uri, deleteRange);
-        await vscode.workspace.applyEdit(edit);
-        
-        // No need to update offset as we're deleting
+        // No need to update offset as we've deleted all characters
       }
       // Handle additions (typing new characters)
       else if (diff.added) {
@@ -153,6 +159,13 @@ export function activate(context: vscode.ExtensionContext) {
         try {
           const currentContent = editor.document.getText();
           await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
+          const edit = new vscode.WorkspaceEdit();
+          const fullRange = new vscode.Range(
+            editor.document.positionAt(0),
+            editor.document.positionAt(editor.document.getText().length)
+          );
+          edit.replace(editor.document.uri, fullRange, snapshot.content);
+          await vscode.workspace.applyEdit(edit);
           vscode.window.showInformationMessage(`Loaded snapshot: "${snapshot.description}"`);
         } catch (err) {
           vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
