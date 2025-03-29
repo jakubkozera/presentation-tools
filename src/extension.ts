@@ -65,10 +65,68 @@ export function activate(context: vscode.ExtensionContext) {
   // Function to type only the differences between current content and target content
   async function applyDiffWithTyping(editor: vscode.TextEditor, currentContent: string, targetContent: string, typingSpeed: number) {
     const differences = diffChars(currentContent, targetContent);
- 
+    console.log('currentContent', currentContent);
+    console.log('targetContent', targetContent);
     console.log('differences', differences);
     
- 
+    // Calculate delay in ms based on typing speed (characters per second)
+    const delayMs = 1000 / typingSpeed;
+    
+    // Track position changes as we make edits
+    let currentOffset = 0;
+    
+    // Process each change sequentially
+    for (const diff of differences) {
+      // Skip if the content is unchanged
+      if (diff.added === undefined && diff.removed === undefined) {
+        currentOffset += diff.value.length;
+        continue;
+      }
+      
+      // Handle removals first (delete characters)
+      if (diff.removed) {
+        const startPos = editor.document.positionAt(currentOffset);
+        const endPos = editor.document.positionAt(currentOffset + diff.value.length);
+        const deleteRange = new vscode.Range(startPos, endPos);
+        
+        // Create and apply edit to remove text
+        const edit = new vscode.WorkspaceEdit();
+        edit.delete(editor.document.uri, deleteRange);
+        await vscode.workspace.applyEdit(edit);
+        
+        // No need to update offset as we're deleting
+      }
+      // Handle additions (typing new characters)
+      else if (diff.added) {
+        // Type each character with a delay for realistic effect
+        for (let i = 0; i < diff.value.length; i++) {
+          // Get current position for each character (it may change after each edit)
+          const insertPosition = editor.document.positionAt(currentOffset);
+          const char = diff.value[i];
+          
+          // Create and apply edit to insert single character
+          const edit = new vscode.WorkspaceEdit();
+          edit.insert(editor.document.uri, insertPosition, char);
+          await vscode.workspace.applyEdit(edit);
+          
+          // Update offset after adding a character
+          currentOffset += 1;
+          
+          // Add delay between characters for typing effect
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+    
+    // Ensure editor shows the final position
+    if (editor.document.lineCount > 0) {
+      editor.revealRange(
+        new vscode.Range(
+          editor.document.positionAt(0),
+          editor.document.positionAt(editor.document.getText().length)
+        )
+      );
+    }
   }
   
   const loadSnapshotCmd = vscode.commands.registerCommand('presentationSnapshots.loadSnapshot', async (snapshot: Snapshot) => {
