@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { diffChars, diffLines } from 'diff';
 
 // Store snapshots in memory
@@ -418,6 +419,107 @@ export function activate(context: vscode.ExtensionContext) {
   // Initial status bar update
   updateStatusBar();
   
+  const showSnapshotDiffCmd = vscode.commands.registerCommand('presentationSnapshots.showSnapshotDiff', async (snapshot: Snapshot) => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+
+    const currentContent = editor.document.getText();
+    const filePath = editor.document.uri.fsPath;
+    
+    // Create temp files in the OS temp directory to avoid permission issues
+    const tempDir = path.join(os.tmpdir(), 'vscode-presentation-snapshots-diff');
+    const fileName = path.basename(filePath);
+    
+    try {
+      // Create temp directory if it doesn't exist
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      
+      // Generate unique filenames to avoid conflicts
+      const timestamp = Date.now();
+      const currentTempFile = path.join(tempDir, `current-${timestamp}-${fileName}`);
+      const snapshotTempFile = path.join(tempDir, `snapshot-${timestamp}-${fileName}`);
+      
+      // Write the contents to the temp files
+      fs.writeFileSync(currentTempFile, currentContent, 'utf8');
+      fs.writeFileSync(snapshotTempFile, snapshot.content, 'utf8');
+      
+      // Ensure the files exist before opening the diff view
+      if (!fs.existsSync(currentTempFile) || !fs.existsSync(snapshotTempFile)) {
+        throw new Error('Failed to create temporary files for diff view');
+      }
+      
+      // Open diff editor with the temp files
+      const currentUri = vscode.Uri.file(currentTempFile);
+      const snapshotUri = vscode.Uri.file(snapshotTempFile);
+      
+      await vscode.commands.executeCommand('vscode.diff',
+        snapshotUri, // Right side (snapshot)
+        currentUri,  // Left side (current)
+        `Snapshot: ${snapshot.description} ↔ Current`
+      );
+
+      // Show option to load this snapshot after viewing diff
+      const loadOption = 'Load this snapshot';
+      const result = await vscode.window.showInformationMessage(
+        `You're viewing the differences for snapshot: "${snapshot.description}"`,
+        loadOption
+      );
+      
+      // If user chooses to load the snapshot
+      if (result === loadOption) {
+        // Find and close diff editor tab before loading
+        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+        
+        // Apply the snapshot content
+        const edit = new vscode.WorkspaceEdit();
+        const fullRange = new vscode.Range(
+          editor.document.positionAt(0),
+          editor.document.positionAt(editor.document.getText().length)
+        );
+        edit.replace(editor.document.uri, fullRange, snapshot.content);
+        await vscode.workspace.applyEdit(edit);
+        
+        vscode.window.showInformationMessage(`Loaded snapshot: "${snapshot.description}"`);
+        
+        // Clean up temp files immediately
+        try {
+          if (fs.existsSync(currentTempFile)) { fs.unlinkSync(currentTempFile); }
+          if (fs.existsSync(snapshotTempFile)) { fs.unlinkSync(snapshotTempFile); }
+        } catch (error) {
+          console.error('Error cleaning up temp diff files:', error);
+        }
+      } else {
+        // Clean up temp files after a delay if user doesn't load the snapshot
+        setTimeout(() => {
+          try {
+            if (fs.existsSync(currentTempFile)) { fs.unlinkSync(currentTempFile); }
+            if (fs.existsSync(snapshotTempFile)) { fs.unlinkSync(snapshotTempFile); }
+            
+            // Try to remove temp directory if it's empty
+            try {
+              const files = fs.readdirSync(tempDir);
+              if (files.length === 0) {
+                fs.rmdirSync(tempDir);
+              }
+            } catch (e) {
+              console.log('Could not remove temp directory:', e);
+            }
+          } catch (error) {
+            console.error('Error cleaning up temp diff files:', error);
+          }
+        }, 30000); // Clean up after 30 seconds to give more time
+      }
+      
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error showing diff: ${error}`);
+    }
+  });
+  
   // Register all commands and views
   context.subscriptions.push(
     saveSnapshotCmd,
@@ -427,6 +529,7 @@ export function activate(context: vscode.ExtensionContext) {
     deleteSnapshotCmd,
     exportSnapshotsCmd,
     importSnapshotsCmd,
+    showSnapshotDiffCmd,
     treeView,
     typingModeStatusBarItem
   );

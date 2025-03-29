@@ -16,7 +16,8 @@
     "onCommand:presentationSnapshots.exportSnapshots",
     "onCommand:presentationSnapshots.importSnapshots",
     "onCommand:presentationSnapshots.toggleTypingMode",
-    "onCommand:presentationSnapshots.adjustTypingSpeed"
+    "onCommand:presentationSnapshots.adjustTypingSpeed",
+    "onCommand:presentationSnapshots.showSnapshotDiff"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -51,6 +52,11 @@
         "icon": "$(trash)"
       },
       {
+        "command": "presentationSnapshots.showSnapshotDiff",
+        "title": "Show Diff",
+        "icon": "$(diff)"
+      },
+      {
         "command": "presentationSnapshots.exportSnapshots",
         "title": "Export All Snapshots"
       },
@@ -78,14 +84,19 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "presentationSnapshots.loadSnapshot",
+          "command": "presentationSnapshots.showSnapshotDiff",
           "when": "view == presentationSnapshotsView && viewItem == snapshot",
           "group": "inline@1"
         },
         {
-          "command": "presentationSnapshots.deleteSnapshot",
+          "command": "presentationSnapshots.loadSnapshot",
           "when": "view == presentationSnapshotsView && viewItem == snapshot",
           "group": "inline@2"
+        },
+        {
+          "command": "presentationSnapshots.deleteSnapshot",
+          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "group": "inline@3"
         }
       ],
       "view/title": [
