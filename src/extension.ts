@@ -72,51 +72,114 @@ export function activate(context: vscode.ExtensionContext) {
     // Calculate delay in ms based on typing speed (characters per second)
     const delayMs = 1000 / typingSpeed;
     
-    // Track position changes as we make edits
-    let currentOffset = 0;
-    
-    // Process each change sequentially
+    // STAGE 1: Handle all removals first
+    // Process each change sequentially, but only handle removals
     for (const diff of differences) {
       // Skip if the content is unchanged
       if (diff.added === undefined && diff.removed === undefined) {
-        currentOffset += diff.value.length;
         continue;
       }
       
       // Handle removals first (delete characters)
       if (diff.removed) {
-        // Remove characters one by one, from last to first
-        for (let i = diff.value.length - 1; i >= 0; i--) {
-          const startPos = editor.document.positionAt(currentOffset + i);
-          const endPos = editor.document.positionAt(currentOffset + i + 1);
+        const searchText = diff.value;
+        
+        // Find the position of this text in the current document
+        const currentDocText = editor.document.getText();
+        const removePos = currentDocText.indexOf(searchText);
+        
+        if (removePos !== -1) {
+          // Remove the text
+          const startPos = editor.document.positionAt(removePos);
+          const endPos = editor.document.positionAt(removePos + searchText.length);
           const deleteRange = new vscode.Range(startPos, endPos);
           
-          // Create and apply edit to remove a single character
+          // Create and apply edit to remove the text
           const edit = new vscode.WorkspaceEdit();
           edit.delete(editor.document.uri, deleteRange);
           await vscode.workspace.applyEdit(edit);
           
-          // Add delay between character deletions for typing effect
-          await new Promise(resolve => setTimeout(resolve, delayMs));
+          // Add delay for typing effect
+          await new Promise(resolve => setTimeout(resolve, delayMs * 2));
+        }
+      } else if (diff.added) {
+        // Skip additions for now, we'll handle them in stage 2
+        continue;
+      }
+    }
+    
+    // STAGE 2: Recalculate differences and handle additions
+    // Get the current content after removals
+    const updatedCurrentContent = editor.document.getText();
+    const secondDifferences = diffChars(updatedCurrentContent, targetContent);
+    console.log('updatedCurrentContent after removals', updatedCurrentContent);
+    console.log('second differences', secondDifferences);
+    
+    // Now process each change for additions only
+    let lastUnchangedText = "";
+    let currentPosition = 0;
+    
+    for (const diff of secondDifferences) {
+      // Handle unchanged text - use this to find position
+      if (diff.added === undefined && diff.removed === undefined) {
+        lastUnchangedText = diff.value;
+        continue;
+      }
+      
+      // Skip removals in this pass (they should have been handled)
+      if (diff.removed) {
+        continue;
+      }
+      
+      // Handle additions (typing new characters)
+      if (diff.added) {
+        const textToAdd = diff.value;
+        
+        // Find where to insert the text
+        const currentDocText = editor.document.getText();
+        
+        // If we have preceding unchanged text, find its position
+        let insertPosition: vscode.Position;
+        if (lastUnchangedText) {
+          // Find the position after the last unchanged text
+          const textPos = currentDocText.indexOf(lastUnchangedText, currentPosition);
+          if (textPos !== -1) {
+            currentPosition = textPos + lastUnchangedText.length;
+            insertPosition = editor.document.positionAt(currentPosition);
+          } else {
+            // Fallback to current position if text not found
+            insertPosition = editor.document.positionAt(currentPosition);
+          }
+        } else {
+          // If no preceding unchanged text, use the beginning of document
+          insertPosition = editor.document.positionAt(currentPosition);
         }
         
-        // No need to update offset as we've deleted all characters
-      }
-      // Handle additions (typing new characters)
-      else if (diff.added) {
         // Type each character with a delay for realistic effect
-        for (let i = 0; i < diff.value.length; i++) {
-          // Get current position for each character (it may change after each edit)
-          const insertPosition = editor.document.positionAt(currentOffset);
-          const char = diff.value[i];
+        for (let i = 0; i < textToAdd.length; i++) {
+          const char = textToAdd[i];
           
           // Create and apply edit to insert single character
           const edit = new vscode.WorkspaceEdit();
-          edit.insert(editor.document.uri, insertPosition, char);
-          await vscode.workspace.applyEdit(edit);
           
-          // Update offset after adding a character
-          currentOffset += 1;
+          // Need to get current position for each character as it may have changed
+          const currentDocText = editor.document.getText();
+          let currentInsertPos: vscode.Position;
+          
+          if (i === 0) {
+            currentInsertPos = insertPosition;
+          } else {
+            // For subsequent characters, add after the previous ones
+            const prevTextPos = currentDocText.indexOf(textToAdd.substring(0, i), currentPosition);
+            if (prevTextPos !== -1) {
+              currentInsertPos = editor.document.positionAt(prevTextPos + i);
+            } else {
+              currentInsertPos = insertPosition;
+            }
+          }
+          
+          edit.insert(editor.document.uri, currentInsertPos, char);
+          await vscode.workspace.applyEdit(edit);
           
           // Add delay between characters for typing effect
           await new Promise(resolve => setTimeout(resolve, delayMs));
