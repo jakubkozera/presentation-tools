@@ -142,6 +142,36 @@ export function registerSnapshotCommands(
     }
   });
 
+  // Delete all snapshots command
+  const deleteAllSnapshotsCmd = vscode.commands.registerCommand('presentationSnapshots.deleteAllSnapshots', async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+    
+    const filePath = editor.document.uri.fsPath;
+    if (!fileSnapshots[filePath] || fileSnapshots[filePath].length === 0) {
+      vscode.window.showInformationMessage('No snapshots to delete');
+      return;
+    }
+    
+    const snapshotCount = fileSnapshots[filePath].length;
+    
+    // Show confirmation dialog with the number of snapshots that will be deleted
+    const confirmMessage = `Are you sure you want to delete all ${snapshotCount} snapshots for this file? This action cannot be undone.`;
+    const confirmOptions = ['Delete All Snapshots', 'Cancel'];
+    
+    const result = await vscode.window.showWarningMessage(confirmMessage, ...confirmOptions);
+    
+    if (result === confirmOptions[0]) {
+      // User confirmed deletion
+      fileSnapshots[filePath] = [];
+      showTemporaryMessage(`Deleted all ${snapshotCount} snapshots`);
+      snapshotProvider.refresh();
+    }
+  });
+
   // Export snapshots command
   const exportSnapshotsCmd = vscode.commands.registerCommand('presentationSnapshots.exportSnapshots', async () => {
     const editor = vscode.window.activeTextEditor;
@@ -214,6 +244,7 @@ export function registerSnapshotCommands(
     loadSnapshotCmd,
     loadSnapshotInstantlyCmd,
     deleteSnapshotCmd,
+    deleteAllSnapshotsCmd,
     exportSnapshotsCmd,
     importSnapshotsCmd
   );

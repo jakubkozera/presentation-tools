@@ -16,7 +16,8 @@
     "onCommand:presentationSnapshots.exportSnapshots",
     "onCommand:presentationSnapshots.importSnapshots",
     "onCommand:presentationSnapshots.adjustTypingSpeed",
-    "onCommand:presentationSnapshots.showSnapshotDiff"
+    "onCommand:presentationSnapshots.showSnapshotDiff",
+    "onCommand:presentationSnapshots.deleteAllSnapshots"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -48,7 +49,7 @@
       {
         "command": "presentationSnapshots.deleteSnapshot",
         "title": "Delete Snapshot",
-        "icon": "$(trash)"
+        "icon": "$(x)"
       },
       {
         "command": "presentationSnapshots.showSnapshotDiff",
@@ -57,15 +58,23 @@
       },
       {
         "command": "presentationSnapshots.exportSnapshots",
-        "title": "Export All Snapshots"
+        "title": "Export All Snapshots",
+        "icon": "$(repo-push)"
       },
       {
         "command": "presentationSnapshots.importSnapshots",
-        "title": "Import Snapshots"
+        "title": "Import Snapshots",
+        "icon": "$(repo-pull)"
       },
       {
         "command": "presentationSnapshots.adjustTypingSpeed",
-        "title": "Adjust Typing Speed"
+        "title": "Adjust Typing Speed",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "presentationSnapshots.deleteAllSnapshots",
+        "title": "Delete All Snapshots",
+        "icon": "$(trash)"
       }
     ],
     "views": {
@@ -96,9 +105,24 @@
       ],
       "view/title": [
         {
+          "command": "presentationSnapshots.exportSnapshots",
+          "when": "view == presentationSnapshotsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "presentationSnapshots.importSnapshots",
+          "when": "view == presentationSnapshotsView",
+          "group": "navigation@2"
+        },
+        {
           "command": "presentationSnapshots.adjustTypingSpeed",
           "when": "view == presentationSnapshotsView && config.presentationSnapshots.useTypingMode",
-          "group": "navigation"
+          "group": "navigation@3"
+        },
+        {
+          "command": "presentationSnapshots.deleteAllSnapshots",
+          "when": "view == presentationSnapshotsView && presentationSnapshotsHasSnapshots",
+          "group": "navigation@4"
         }
       ]
     },
