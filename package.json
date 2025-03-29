@@ -15,7 +15,6 @@
     "onCommand:presentationSnapshots.deleteSnapshot",
     "onCommand:presentationSnapshots.exportSnapshots",
     "onCommand:presentationSnapshots.importSnapshots",
-    "onCommand:presentationSnapshots.toggleTypingMode",
     "onCommand:presentationSnapshots.adjustTypingSpeed",
     "onCommand:presentationSnapshots.showSnapshotDiff"
   ],
@@ -65,10 +64,6 @@
         "title": "Import Snapshots"
       },
       {
-        "command": "presentationSnapshots.toggleTypingMode",
-        "title": "Toggle Typing Mode"
-      },
-      {
         "command": "presentationSnapshots.adjustTypingSpeed",
         "title": "Adjust Typing Speed"
       }
@@ -100,11 +95,6 @@
         }
       ],
       "view/title": [
-        {
-          "command": "presentationSnapshots.toggleTypingMode",
-          "when": "view == presentationSnapshotsView",
-          "group": "navigation"
-        },
         {
           "command": "presentationSnapshots.adjustTypingSpeed",
           "when": "view == presentationSnapshotsView && config.presentationSnapshots.useTypingMode",

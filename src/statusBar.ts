@@ -13,21 +13,9 @@ function updateStatusBar(): void {
   
   typingModeStatusBarItem.text = useTypingMode ? `$(keyboard) Typing: ${typingSpeed} cps` : `$(keyboard) Typing: Off`;
   typingModeStatusBarItem.tooltip = useTypingMode ? 
-    `Typing mode enabled (${typingSpeed} characters per second). Click to disable.` : 
-    'Typing mode disabled. Click to enable.';
+    `Typing mode ${useTypingMode ? 'enabled' : 'disabled'} (${typingSpeed} characters per second)` : 
+    'Typing mode disabled';
   typingModeStatusBarItem.show();
-}
-
-/**
- * Toggles the typing mode on/off
- */
-async function toggleTypingMode(): Promise<void> {
-  const config = vscode.workspace.getConfiguration('presentationSnapshots');
-  const currentValue = config.get('useTypingMode', false);
-  
-  await config.update('useTypingMode', !currentValue, vscode.ConfigurationTarget.Global);
-  vscode.window.showInformationMessage(`Typing mode ${!currentValue ? 'enabled' : 'disabled'}`);
-  updateStatusBar();
 }
 
 /**
@@ -61,13 +49,12 @@ async function adjustTypingSpeed(): Promise<void> {
 export function initializeStatusBar(context: vscode.ExtensionContext): void {
   // Create status bar item
   typingModeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  typingModeStatusBarItem.command = 'presentationSnapshots.toggleTypingMode';
+  // No command association - status bar item is now just informational
   
   // Initial status bar update
   updateStatusBar();
   
   // Register commands
-  const toggleTypingModeCmd = vscode.commands.registerCommand('presentationSnapshots.toggleTypingMode', toggleTypingMode);
   const adjustTypingSpeedCmd = vscode.commands.registerCommand('presentationSnapshots.adjustTypingSpeed', adjustTypingSpeed);
   
   // Listen for configuration changes
@@ -77,7 +64,6 @@ export function initializeStatusBar(context: vscode.ExtensionContext): void {
         updateStatusBar();
       }
     }),
-    toggleTypingModeCmd,
     adjustTypingSpeedCmd,
     typingModeStatusBarItem
   );
