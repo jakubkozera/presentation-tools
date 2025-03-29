@@ -14,6 +14,14 @@ export class SnapshotProvider implements vscode.TreeDataProvider<Snapshot> {
     const item = new vscode.TreeItem(element.description);
     item.tooltip = new Date(element.timestamp).toLocaleString();
     item.contextValue = 'snapshot';
+    
+    // Add a direct command to instantly load the snapshot when clicking on the tree item
+    item.command = {
+      command: 'presentationSnapshots.loadSnapshotInstantly',
+      title: 'Load Snapshot Instantly',
+      arguments: [element]
+    };
+    
     return item;
   }
   

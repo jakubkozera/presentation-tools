@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { Snapshot } from './utils';
+import { Snapshot, showTemporaryMessage } from './utils';
 import { applyDiffWithTyping } from './typingEffect';
 
 /**
@@ -103,7 +103,9 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
           try {
             const currentContent = editor.document.getText();
             await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
-            vscode.window.showInformationMessage(`Loaded snapshot: "${snapshot.description}" with typing effect`);
+            
+            // Use temporary message for loading notification
+            showTemporaryMessage(`Loaded snapshot: "${snapshot.description}" with typing effect`);
           } catch (err) {
             vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
           }
@@ -118,7 +120,8 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
         edit.replace(editor.document.uri, fullRange, snapshot.content);
         await vscode.workspace.applyEdit(edit);
         
-        vscode.window.showInformationMessage(`Loaded snapshot: "${snapshot.description}"`);
+        // Use temporary message for loading notification
+        showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
       }
     } else {
       // Clean up temp files after a delay if user doesn't load the snapshot

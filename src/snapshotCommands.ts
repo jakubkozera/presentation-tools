@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { Snapshot, fileSnapshots } from './utils';
+import { Snapshot, fileSnapshots, showTemporaryMessage } from './utils';
 import { applyDiffWithTyping } from './typingEffect';
 import { SnapshotProvider } from './snapshotProvider';
 
@@ -81,7 +81,9 @@ export function registerSnapshotCommands(
           );
           edit.replace(editor.document.uri, fullRange, snapshot.content);
           await vscode.workspace.applyEdit(edit);
-          vscode.window.showInformationMessage(`Loaded snapshot: "${snapshot.description}"`);
+          
+          // Use temporary message for loading notification
+          showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
         } catch (err) {
           vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
         }
@@ -96,8 +98,30 @@ export function registerSnapshotCommands(
       edit.replace(editor.document.uri, fullRange, snapshot.content);
       await vscode.workspace.applyEdit(edit);
       
-      vscode.window.showInformationMessage(`Loaded snapshot: "${snapshot.description}"`);
+      // Use temporary message for loading notification
+      showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
     }
+  });
+  
+  // Load snapshot instantly command (for direct clicks on tree items)
+  const loadSnapshotInstantlyCmd = vscode.commands.registerCommand('presentationSnapshots.loadSnapshotInstantly', async (snapshot: Snapshot) => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+    
+    // Always use instant replace regardless of typing mode setting
+    const edit = new vscode.WorkspaceEdit();
+    const fullRange = new vscode.Range(
+      editor.document.positionAt(0),
+      editor.document.positionAt(editor.document.getText().length)
+    );
+    edit.replace(editor.document.uri, fullRange, snapshot.content);
+    await vscode.workspace.applyEdit(edit);
+    
+    // Use temporary message for loading notification
+    showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
   });
   
   // Delete snapshot command
@@ -111,7 +135,9 @@ export function registerSnapshotCommands(
     const filePath = editor.document.uri.fsPath;
     if (fileSnapshots[filePath]) {
       fileSnapshots[filePath] = fileSnapshots[filePath].filter(s => s.id !== snapshot.id);
-      vscode.window.showInformationMessage(`Deleted snapshot: "${snapshot.description}"`);
+      
+      // Use temporary message for deletion notification
+      showTemporaryMessage(`Deleted snapshot: "${snapshot.description}"`);
       snapshotProvider.refresh();
     }
   });
@@ -186,6 +212,7 @@ export function registerSnapshotCommands(
   context.subscriptions.push(
     saveSnapshotCmd,
     loadSnapshotCmd,
+    loadSnapshotInstantlyCmd,
     deleteSnapshotCmd,
     exportSnapshotsCmd,
     importSnapshotsCmd
