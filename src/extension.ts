@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { diffLines } from 'diff';
+import { diffChars, diffLines } from 'diff';
 
 // Store snapshots in memory
 interface Snapshot {
@@ -64,62 +64,11 @@ export function activate(context: vscode.ExtensionContext) {
   
   // Function to type only the differences between current content and target content
   async function applyDiffWithTyping(editor: vscode.TextEditor, currentContent: string, targetContent: string, typingSpeed: number) {
-    const differences = diffLines(currentContent, targetContent);
+    const differences = diffChars(currentContent, targetContent);
+ 
+    console.log('differences', differences);
     
-    // First, collect all removals to perform them first
-    const removals: {startPos: vscode.Position; endPos: vscode.Position}[] = [];
-    let removalOffset = 0;
-
-    for (const part of differences) {
-      if (part.removed) {
-        const startPos = editor.document.positionAt(removalOffset);
-        const endPos = editor.document.positionAt(removalOffset + part.value.length);
-        removals.push({ startPos, endPos });
-      } 
-      
-      if (!part.added) {
-        // Move offset for unchanged or removed parts
-        removalOffset += part.value.length;
-      }
-    }
-    
-    // First perform all removals
-    for (const removal of removals.reverse()) { // Remove from end to start to maintain position validity
-      await editor.edit(editBuilder => {
-        editBuilder.delete(new vscode.Range(removal.startPos, removal.endPos));
-      });
-      // Small pause between deletions for visual effect
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    // Then process additions
-    let offset = 0;
-    
-    for (const part of differences) {
-      if (part.added) {
-        // This is new text to add
-        const insertPosition = editor.document.positionAt(offset);
-        
-        // Type each character of the added text
-        for (let i = 0; i < part.value.length; i++) {
-          await editor.edit(editBuilder => {
-            editBuilder.insert(
-              editor.document.positionAt(offset + i), 
-              part.value[i]
-            );
-          });
-          
-          // Pause based on typing speed
-          await new Promise(resolve => setTimeout(resolve, 1000 / typingSpeed));
-        }
-        
-        offset += part.value.length;
-      } 
-      else if (!part.removed) {
-        // This is unchanged text
-        offset += part.value.length;
-      }
-    }
+ 
   }
   
   const loadSnapshotCmd = vscode.commands.registerCommand('presentationSnapshots.loadSnapshot', async (snapshot: Snapshot) => {
