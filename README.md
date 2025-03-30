@@ -1,71 +1,60 @@
-# presentation-snapshots README
+# Presentation Snapshots - VS Code Extension
 
-This is the README for your extension "presentation-snapshots". After writing up a brief description, we recommend including the following sections.
+## Overview
+Presentation Snapshots is a VS Code extension that enhances your coding demonstrations and presentations by allowing you to create pre-defined snapshots of your code that can be recalled with a typewriter-like animation effect.
 
 ## Features
+- **Code Snapshots**: Save important states of your code to recall during presentations
+- **Typewriter Animation**: Simulate live coding with realistic typing animations
+- **Customizable Speed**: Adjust the typing speed to match your presentation pace
+- **Cross-Platform**: Works on Windows, macOS, and Linux
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Installation
+You can install this extension in one of two ways:
 
-For example if there is an image subfolder under your extension project workspace:
+### From VS Code Marketplace
+1. Open VS Code
+2. Go to Extensions view (Ctrl+Shift+X or Cmd+Shift+X)
+3. Search for "Presentation Snapshots"
+4. Click Install
 
-\!\[feature X\]\(images/feature-x.png\)
+### Manual Installation (VSIX)
+1. Download the `.vsix` file from the releases page
+2. Open VS Code
+3. Go to Extensions view
+4. Click the "..." menu in the top-right corner
+5. Select "Install from VSIX..."
+6. Choose the downloaded `.vsix` file
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## How to Use
+
+### Creating Snapshots
+1. Prepare your code in the editor
+2. Open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P)
+3. Type "Presentation Snapshots: Save Snapshot"
+4. Enter a name for your snapshot
+
+### Recalling Snapshots
+1. Open the file you want to modify
+2. Open the Command Palette
+3. Type "Presentation Snapshots: Load Snapshot"
+4. Select a previously saved snapshot
+5. Watch as your code transforms with a realistic typing effect
+
+### Adjusting Settings
+You can customize the extension behavior:
+1. Go to File > Preferences > Settings
+2. Search for "Presentation Snapshots"
+3. Adjust the typing speed and other available options
 
 ## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- VS Code 1.60.0 or higher
 
 ## Known Issues
+- Auto-formatting features may interfere with the typing animation - the extension temporarily disables them during playback
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+## License
+This extension is licensed under the MIT License.
