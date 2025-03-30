@@ -114,9 +114,9 @@ export async function applyDiffWithTyping(
             const edit = new vscode.WorkspaceEdit();
 
             // Need to get current position for each character as it may have changed
-            const currentInsertPos = editor.document.positionAt(currentCursorPosition - i + textToRemove.length);
-            console.log('currentInsertPos', currentInsertPos);
-            edit.delete(editor.document.uri, new vscode.Range(currentInsertPos, currentInsertPos.translate(0, -1)));
+            const currentRemovePos = editor.document.positionAt(currentCursorPosition - i + textToRemove.length);
+            console.log('currentRemovePos', currentRemovePos);
+            edit.delete(editor.document.uri, new vscode.Range(currentRemovePos, currentRemovePos.character === 0 ? currentRemovePos : currentRemovePos.translate(0, -1)));
             await vscode.workspace.applyEdit(edit);
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
@@ -124,9 +124,6 @@ export async function applyDiffWithTyping(
         catch (e) {
           console.error('Error deleting text:', e);
         }
-
-
-
       }
       if (diff.added) {
         const textToAdd = diff.value;
