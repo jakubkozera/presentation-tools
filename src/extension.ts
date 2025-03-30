@@ -14,9 +14,10 @@ export function activate(context: vscode.ExtensionContext) {
   // Create the snapshot tree view provider
   const snapshotProvider = new SnapshotProvider();
   
-  // Create the tree view
+  // Create the tree view with drag and drop support
   const treeView = vscode.window.createTreeView('presentationSnapshotsView', {
-    treeDataProvider: snapshotProvider
+    treeDataProvider: snapshotProvider,
+    dragAndDropController: snapshotProvider
   });
   
   // Register snapshot-related commands

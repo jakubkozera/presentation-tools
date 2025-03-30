@@ -17,7 +17,7 @@ export interface FileSnapshots {
 export const fileSnapshots: FileSnapshots = {};
 
 /**
- * Groups snapshots by their group property
+ * Groups snapshots by their group property while preserving their original order
  * @param snapshots Array of snapshots to group
  * @returns A map of group names to snapshot arrays
  */
@@ -27,11 +27,18 @@ export function groupSnapshots(snapshots: Snapshot[]): Map<string, Snapshot[]> {
   // Add ungrouped snapshots to a default group
   const ungrouped: Snapshot[] = [];
   
+  // First pass: initialize groups
   for (const snapshot of snapshots) {
     if (snapshot.group) {
       if (!groups.has(snapshot.group)) {
         groups.set(snapshot.group, []);
       }
+    }
+  }
+  
+  // Second pass: add snapshots to groups in their original order
+  for (const snapshot of snapshots) {
+    if (snapshot.group) {
       groups.get(snapshot.group)!.push(snapshot);
     } else {
       ungrouped.push(snapshot);

@@ -13,7 +13,12 @@ export class SnapshotGroup {
 }
 
 // Tree view for snapshots
-export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem> {
+export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem>, vscode.TreeDragAndDropController<TreeItem> {
+  // Drag and drop capabilities
+  readonly dropMimeTypes = ['application/vnd.code.tree.presentationSnapshotsView'];
+  readonly dragMimeTypes = ['application/vnd.code.tree.presentationSnapshotsView'];
+  
+  // Event emitter for tree data changes
   private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined> = new vscode.EventEmitter<TreeItem | undefined>();
   readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined> = this._onDidChangeTreeData.event;
   
@@ -109,5 +114,144 @@ export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem> {
     });
     
     return Promise.resolve(groups);
+  }
+
+  // Get parent of an item in the tree
+  getParent(element: TreeItem): vscode.ProviderResult<TreeItem> {
+    // If element is a Snapshot, find its parent group
+    if ('content' in element) {
+      const snapshot = element as Snapshot;
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return null;
+      }
+      
+      const filePath = editor.document.uri.fsPath;
+      if (!fileSnapshots[filePath]) {
+        return null;
+      }
+      
+      // Find which group this snapshot belongs to
+      const groupedSnapshots = groupSnapshots(fileSnapshots[filePath]);
+      for (const [groupName, snapshots] of groupedSnapshots.entries()) {
+        if (snapshots.some(s => s.id === snapshot.id)) {
+          return new SnapshotGroup(groupName, snapshots);
+        }
+      }
+    }
+    
+    // If element is a group or we couldn't find a parent, return null
+    return null;
+  }
+  
+  // Handle drag start
+  handleDrag(source: readonly TreeItem[], dataTransfer: vscode.DataTransfer): void {
+    // Only support dragging snapshots, not groups
+    const snapshots = source.filter(item => 'content' in item) as Snapshot[];
+    if (snapshots.length === 0) {
+      return;
+    }
+    
+    // Set the data for the drag operation
+    dataTransfer.set('application/vnd.code.tree.presentationSnapshotsView', 
+      new vscode.DataTransferItem(snapshots));
+  }
+  
+  // Handle drop
+  async handleDrop(target: TreeItem | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+    
+    const filePath = editor.document.uri.fsPath;
+    if (!fileSnapshots[filePath]) {
+      return;
+    }
+    
+    // Get the dragged snapshots
+    const transferItem = dataTransfer.get('application/vnd.code.tree.presentationSnapshotsView');
+    if (!transferItem) {
+      return;
+    }
+    
+    const draggedSnapshots = transferItem.value as Snapshot[];
+    if (!draggedSnapshots || draggedSnapshots.length === 0) {
+      return;
+    }
+    
+    // Handle drop onto a group
+    if (target && 'snapshots' in target) {
+      const targetGroup = target as SnapshotGroup;
+      
+      // Move all dragged snapshots to this group
+      draggedSnapshots.forEach(snapshot => {
+        // Find the snapshot in the original array
+        const index = fileSnapshots[filePath].findIndex(s => s.id === snapshot.id);
+        if (index !== -1) {
+          // Update its group
+          fileSnapshots[filePath][index].group = targetGroup.label;
+        }
+      });
+      
+      this.refresh();
+      return;
+    }
+    
+    // Handle drop onto another snapshot
+    if (target && 'content' in target) {
+      const targetSnapshot = target as Snapshot;
+      
+      // Find the target snapshot's group
+      const targetSnapshotGroup = targetSnapshot.group;
+      
+      // Find target snapshot's index in its group
+      const targetIndex = fileSnapshots[filePath].findIndex(s => s.id === targetSnapshot.id);
+      if (targetIndex === -1) {
+        return;
+      }
+      
+      // Move all dragged snapshots to the target snapshot's group and position
+      draggedSnapshots.forEach(snapshot => {
+        // First, remove the snapshot from its current position
+        const sourceIndex = fileSnapshots[filePath].findIndex(s => s.id === snapshot.id);
+        if (sourceIndex !== -1) {
+          const [removedSnapshot] = fileSnapshots[filePath].splice(sourceIndex, 1);
+          
+          // Update its group if needed
+          if (targetSnapshotGroup) {
+            removedSnapshot.group = targetSnapshotGroup;
+          } else if (removedSnapshot.group) {
+            delete removedSnapshot.group;
+          }
+          
+          // Calculate the new insert position (accounting for removed snapshot)
+          let newIndex = targetIndex;
+          if (sourceIndex < targetIndex) {
+            newIndex--;
+          }
+          
+          // Insert at the new position
+          fileSnapshots[filePath].splice(newIndex + 1, 0, removedSnapshot);
+        }
+      });
+      
+      this.refresh();
+      return;
+    }
+    
+    // If dropped onto an empty area (and not a group), move to ungrouped
+    if (!target) {
+      draggedSnapshots.forEach(snapshot => {
+        // Find the snapshot in the original array
+        const index = fileSnapshots[filePath].findIndex(s => s.id === snapshot.id);
+        if (index !== -1 && fileSnapshots[filePath][index].group) {
+          // Remove from group
+          delete fileSnapshots[filePath][index].group;
+        }
+      });
+      
+      this.refresh();
+    }
   }
 }
