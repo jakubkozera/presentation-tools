@@ -75,6 +75,16 @@
         "command": "presentationSnapshots.deleteAllSnapshots",
         "title": "Delete All Snapshots",
         "icon": "$(trash)"
+      },
+      {
+        "command": "presentationSnapshots.changeSnapshotGroup",
+        "title": "Move to Group",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "presentationSnapshots.deleteGroup",
+        "title": "Delete Group",
+        "icon": "$(trash)"
       }
     ],
     "views": {
@@ -101,6 +111,16 @@
           "command": "presentationSnapshots.deleteSnapshot",
           "when": "view == presentationSnapshotsView && viewItem == snapshot",
           "group": "inline@3"
+        },
+        {
+          "command": "presentationSnapshots.changeSnapshotGroup",
+          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "presentationSnapshots.deleteGroup",
+          "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
+          "group": "inline@1"
         }
       ],
       "view/title": [

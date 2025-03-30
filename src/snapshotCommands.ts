@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { Snapshot, fileSnapshots, showTemporaryMessage } from './utils';
 import { applyDiffWithTyping } from './typingEffect';
-import { SnapshotProvider } from './snapshotProvider';
+import { SnapshotGroup, SnapshotProvider } from './snapshotProvider';
 
 export function registerSnapshotCommands(
   context: vscode.ExtensionContext, 
@@ -28,6 +28,50 @@ export function registerSnapshotCommands(
     if (description === undefined) {
       return; // User cancelled
     }
+
+    // Get existing groups to offer as quick picks
+    const existingGroups = new Set<string>();
+    if (fileSnapshots[filePath]) {
+      fileSnapshots[filePath].forEach(snapshot => {
+        if (snapshot.group) {
+          existingGroups.add(snapshot.group);
+        }
+      });
+    }
+
+    // Convert Set to array of quick pick items
+    const groupQuickPicks = Array.from(existingGroups).map(group => ({
+      label: group,
+      description: 'Existing group'
+    }));
+
+    // Add options to create a new group or leave ungrouped
+    const quickPickOptions = [
+      { label: '$(plus) Create New Group', description: 'Add a new group name' },
+      { label: '$(circle-slash) No Group', description: 'Leave snapshot ungrouped' },
+      ...groupQuickPicks
+    ];
+
+    // Show quick pick for groups
+    const selectedOption = await vscode.window.showQuickPick(quickPickOptions, {
+      placeHolder: 'Select a group for this snapshot (optional)'
+    });
+
+    let group: string | undefined;
+    
+    if (selectedOption) {
+      if (selectedOption.label === '$(plus) Create New Group') {
+        // Ask for new group name
+        group = await vscode.window.showInputBox({
+          prompt: 'Enter a name for the new group',
+          placeHolder: 'e.g. "Setup", "Final Implementation"'
+        });
+      } else if (selectedOption.label === '$(circle-slash) No Group') {
+        group = undefined;
+      } else {
+        group = selectedOption.label;
+      }
+    }
     
     // Create snapshot
     const snapshot: Snapshot = {
@@ -36,6 +80,11 @@ export function registerSnapshotCommands(
       description,
       timestamp: Date.now()
     };
+
+    // Add group if selected
+    if (group) {
+      snapshot.group = group;
+    }
     
     // Store snapshot
     if (!fileSnapshots[filePath]) {
@@ -43,7 +92,7 @@ export function registerSnapshotCommands(
     }
     fileSnapshots[filePath].push(snapshot);
     
-    vscode.window.showInformationMessage(`Snapshot "${description}" saved`);
+    vscode.window.showInformationMessage(`Snapshot "${description}" saved${group ? ` in group "${group}"` : ''}`);
     
     // Refresh view
     snapshotProvider.refresh();
@@ -238,6 +287,121 @@ export function registerSnapshotCommands(
     }
   });
 
+  // Change snapshot group command
+  const changeSnapshotGroupCmd = vscode.commands.registerCommand('presentationSnapshots.changeSnapshotGroup', async (snapshot: Snapshot) => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+
+    const filePath = editor.document.uri.fsPath;
+    if (!fileSnapshots[filePath]) {
+      return;
+    }
+
+    // Get existing groups to offer as quick picks
+    const existingGroups = new Set<string>();
+    fileSnapshots[filePath].forEach(s => {
+      if (s.group) {
+        existingGroups.add(s.group);
+      }
+    });
+
+    // Convert Set to array of quick pick items
+    const groupQuickPicks = Array.from(existingGroups).map(group => ({
+      label: group,
+      description: snapshot.group === group ? '(Current)' : 'Existing group'
+    }));
+
+    // Add options to create a new group or leave ungrouped
+    const quickPickOptions = [
+      { label: '$(plus) Create New Group', description: 'Add a new group name' },
+      { label: '$(circle-slash) No Group', description: 'Leave snapshot ungrouped' },
+      ...groupQuickPicks
+    ];
+
+    // Show quick pick for groups
+    const selectedOption = await vscode.window.showQuickPick(quickPickOptions, {
+      placeHolder: `Change group for snapshot "${snapshot.description}"`
+    });
+
+    if (!selectedOption) {
+      return; // User cancelled
+    }
+
+    let newGroup: string | undefined;
+    
+    if (selectedOption.label === '$(plus) Create New Group') {
+      // Ask for new group name
+      newGroup = await vscode.window.showInputBox({
+        prompt: 'Enter a name for the new group',
+        placeHolder: 'e.g. "Setup", "Final Implementation"'
+      });
+      
+      if (newGroup === undefined) {
+        return; // User cancelled
+      }
+    } else if (selectedOption.label === '$(circle-slash) No Group') {
+      newGroup = undefined;
+    } else {
+      newGroup = selectedOption.label;
+    }
+
+    // Find snapshot in array and update its group
+    const snapshotIndex = fileSnapshots[filePath].findIndex(s => s.id === snapshot.id);
+    if (snapshotIndex !== -1) {
+      if (newGroup) {
+        fileSnapshots[filePath][snapshotIndex].group = newGroup;
+        showTemporaryMessage(`Moved "${snapshot.description}" to group "${newGroup}"`);
+      } else {
+        delete fileSnapshots[filePath][snapshotIndex].group;
+        showTemporaryMessage(`Removed "${snapshot.description}" from its group`);
+      }
+      
+      snapshotProvider.refresh();
+    }
+  });
+
+  // Delete group command
+  const deleteGroupCmd = vscode.commands.registerCommand('presentationSnapshots.deleteGroup', async (group: SnapshotGroup) => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+
+    const filePath = editor.document.uri.fsPath;
+    if (!fileSnapshots[filePath]) {
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmMessage = `Delete group "${group.label}"? This will delete all ${group.snapshots.length} snapshots in this group.`;
+    const confirmOptions = ['Delete Group', 'Keep Group but Remove Grouping', 'Cancel'];
+    
+    const result = await vscode.window.showWarningMessage(confirmMessage, ...confirmOptions);
+    
+    if (result === confirmOptions[0]) {
+      // Delete snapshots in group
+      const idsToDelete = new Set(group.snapshots.map(s => s.id));
+      fileSnapshots[filePath] = fileSnapshots[filePath].filter(s => !idsToDelete.has(s.id));
+      
+      showTemporaryMessage(`Deleted group "${group.label}" and all its snapshots`);
+      snapshotProvider.refresh();
+    } else if (result === confirmOptions[1]) {
+      // Keep snapshots but remove them from the group
+      fileSnapshots[filePath].forEach(s => {
+        if (s.group === group.label) {
+          delete s.group;
+        }
+      });
+      
+      showTemporaryMessage(`Removed grouping for snapshots in "${group.label}"`);
+      snapshotProvider.refresh();
+    }
+  });
+
   // Register all commands
   context.subscriptions.push(
     saveSnapshotCmd,
@@ -246,6 +410,8 @@ export function registerSnapshotCommands(
     deleteSnapshotCmd,
     deleteAllSnapshotsCmd,
     exportSnapshotsCmd,
-    importSnapshotsCmd
+    importSnapshotsCmd,
+    changeSnapshotGroupCmd,
+    deleteGroupCmd
   );
 }

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { SnapshotProvider } from './snapshotProvider';
+import { SnapshotProvider, SnapshotGroup } from './snapshotProvider';
 import { registerSnapshotCommands } from './snapshotCommands';
 import { registerDiffViewerCommands } from './diffViewer';
 import { initializeStatusBar } from './statusBar';
