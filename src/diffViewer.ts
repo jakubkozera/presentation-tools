@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { Snapshot, showTemporaryMessage } from './utils';
 import { applyDiffWithTyping } from './typingEffect';
+import { SnapshotGroup } from './snapshotProvider';
 
 /**
  * Show a diff view comparing current file content with a snapshot
@@ -106,8 +107,9 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
             
             // Use temporary message for loading notification
             showTemporaryMessage(`Loaded snapshot: "${snapshot.description}" with typing effect`);
-          } catch (err) {
-            vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
+          } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            vscode.window.showErrorMessage(`Error loading snapshot: ${errorMessage}`);
           }
         });
       } else {
@@ -150,6 +152,103 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
   }
 }
 
+/**
+ * Show a diff view for a group of snapshots, using the last snapshot in the group
+ * @param group The snapshot group to compare with current content
+ */
+export async function showGroupDiff(group: SnapshotGroup): Promise<void> {
+  if (!group.snapshots || group.snapshots.length === 0) {
+    vscode.window.showErrorMessage(`No snapshots found in group "${group.label}"`);
+    return;
+  }
+  
+  // Use the last snapshot in the group for the diff
+  const lastSnapshot = group.snapshots[group.snapshots.length - 1];
+  
+  // Show diff using the last snapshot in the group
+  await showSnapshotDiff(lastSnapshot);
+}
+
+/**
+ * Load all snapshots in a group sequentially with typing effect
+ * @param group The snapshot group to load
+ */
+export async function loadGroupWithTypingEffect(group: SnapshotGroup): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showErrorMessage('No active editor found');
+    return;
+  }
+  
+  if (!group.snapshots || group.snapshots.length === 0) {
+    vscode.window.showErrorMessage(`No snapshots found in group "${group.label}"`);
+    return;
+  }
+  
+  const config = vscode.workspace.getConfiguration('presentationSnapshots');
+  const typingSpeed = config.get('typingSpeed', 10); // Characters per second
+  
+  // Start progress indicator
+  await vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    title: `Loading snapshots from group "${group.label}"`,
+    cancellable: true
+  }, async (progress, token) => {
+    token.onCancellationRequested(() => {
+      vscode.window.showInformationMessage('Group loading cancelled');
+      throw new Error('Cancelled by user');
+    });
+    
+    try {
+      let currentContent = editor.document.getText();
+      
+      // Calculate increment per snapshot
+      const increment = 100 / group.snapshots.length;
+      
+      // Apply each snapshot in sequence
+      for (let i = 0; i < group.snapshots.length; i++) {
+        const snapshot = group.snapshots[i];
+        
+        // Report progress
+        progress.report({ 
+          increment,
+          message: `Step ${i + 1}/${group.snapshots.length}: "${snapshot.description}"`
+        });
+        
+        // Apply current snapshot
+        await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
+        
+        // Update current content for next iteration
+        currentContent = snapshot.content;
+        
+        // Pause briefly between snapshots if there are more to come
+        if (i < group.snapshots.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second pause between snapshots
+        }
+        
+        // Check if operation was cancelled
+        if (token.isCancellationRequested) {
+          return;
+        }
+      }
+      
+      // Show completion message
+      showTemporaryMessage(`Loaded all ${group.snapshots.length} snapshots from group "${group.label}"`);
+      
+    } catch (err: unknown) {
+      // Properly handle unknown type error
+      if (err instanceof Error && err.message === 'Cancelled by user') {
+        // Already handled by cancellation
+        return;
+      }
+      
+      // For other errors, show an error message
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      vscode.window.showErrorMessage(`Error loading snapshots: ${errorMessage}`);
+    }
+  });
+}
+
 export function registerDiffViewerCommands(context: vscode.ExtensionContext): void {
   // Register the showSnapshotDiff command
   const showSnapshotDiffCmd = vscode.commands.registerCommand(
@@ -157,5 +256,21 @@ export function registerDiffViewerCommands(context: vscode.ExtensionContext): vo
     showSnapshotDiff
   );
   
-  context.subscriptions.push(showSnapshotDiffCmd);
+  // Register the showGroupDiff command
+  const showGroupDiffCmd = vscode.commands.registerCommand(
+    'presentationSnapshots.showGroupDiff', 
+    showGroupDiff
+  );
+  
+  // Register the loadGroupWithTypingEffect command
+  const loadGroupWithTypingEffectCmd = vscode.commands.registerCommand(
+    'presentationSnapshots.loadGroupWithTypingEffect', 
+    loadGroupWithTypingEffect
+  );
+  
+  context.subscriptions.push(
+    showSnapshotDiffCmd,
+    showGroupDiffCmd,
+    loadGroupWithTypingEffectCmd
+  );
 }

@@ -17,7 +17,11 @@
     "onCommand:presentationSnapshots.importSnapshots",
     "onCommand:presentationSnapshots.adjustTypingSpeed",
     "onCommand:presentationSnapshots.showSnapshotDiff",
-    "onCommand:presentationSnapshots.deleteAllSnapshots"
+    "onCommand:presentationSnapshots.deleteAllSnapshots",
+    "onCommand:presentationSnapshots.changeSnapshotGroup",
+    "onCommand:presentationSnapshots.deleteGroup",
+    "onCommand:presentationSnapshots.showGroupDiff",
+    "onCommand:presentationSnapshots.loadGroupWithTypingEffect"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -85,6 +89,16 @@
         "command": "presentationSnapshots.deleteGroup",
         "title": "Delete Group",
         "icon": "$(trash)"
+      },
+      {
+        "command": "presentationSnapshots.showGroupDiff",
+        "title": "Show Group Diff",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "presentationSnapshots.loadGroupWithTypingEffect",
+        "title": "Run Group Presentation",
+        "icon": "$(play)"
       }
     ],
     "views": {
@@ -121,6 +135,16 @@
           "command": "presentationSnapshots.deleteGroup",
           "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@1"
+        },
+        {
+          "command": "presentationSnapshots.showGroupDiff",
+          "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
+          "group": "inline@2"
+        },
+        {
+          "command": "presentationSnapshots.loadGroupWithTypingEffect",
+          "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
+          "group": "inline@3"
         }
       ],
       "view/title": [
