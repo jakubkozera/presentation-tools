@@ -19,7 +19,7 @@ function getConfigurationTarget(): vscode.ConfigurationTarget {
   if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
     return vscode.ConfigurationTarget.Workspace;
   }
-  
+
   // Fall back to global settings if no workspace is open
   return vscode.ConfigurationTarget.Global;
 }
@@ -31,7 +31,7 @@ function getConfigurationTarget(): vscode.ConfigurationTarget {
 async function disableAutoFormatting(): Promise<FormattingSettings> {
   const config = vscode.workspace.getConfiguration('editor');
   const configTarget = getConfigurationTarget();
-  
+
   // Store original settings
   const originalSettings: FormattingSettings = {
     formatOnType: config.get<boolean>('formatOnType', false),
@@ -40,13 +40,13 @@ async function disableAutoFormatting(): Promise<FormattingSettings> {
     autoIndent: config.get<string | boolean>('autoIndent', 'full'),
     configTarget
   };
-  
+
   // Disable all auto-formatting
   await config.update('formatOnType', false, configTarget);
   await config.update('formatOnPaste', false, configTarget);
   await config.update('formatOnSave', false, configTarget);
   await config.update('autoIndent', 'none', configTarget);
-  
+
   return originalSettings;
 }
 
@@ -57,7 +57,7 @@ async function disableAutoFormatting(): Promise<FormattingSettings> {
 async function restoreAutoFormatting(originalSettings: FormattingSettings): Promise<void> {
   const config = vscode.workspace.getConfiguration('editor');
   const configTarget = originalSettings.configTarget;
-  
+
   // Restore original settings
   await config.update('formatOnType', originalSettings.formatOnType, configTarget);
   await config.update('formatOnPaste', originalSettings.formatOnPaste, configTarget);
@@ -73,14 +73,14 @@ async function restoreAutoFormatting(originalSettings: FormattingSettings): Prom
  * @param typingSpeed Characters per second for the typing effect
  */
 export async function applyDiffWithTyping(
-  editor: vscode.TextEditor, 
-  currentContent: string, 
-  targetContent: string, 
+  editor: vscode.TextEditor,
+  currentContent: string,
+  targetContent: string,
   typingSpeed: number
 ): Promise<void> {
   // Disable auto-formatting before we start typing
   let originalSettings: FormattingSettings | null = null;
-  
+
   try {
     // Try to disable auto-formatting, but continue even if it fails
     try {
@@ -89,54 +89,69 @@ export async function applyDiffWithTyping(
       console.error('Failed to disable auto-formatting:', error);
       // Continue with typing effect even if we couldn't disable formatting
     }
-    
+
     const differences = diffChars(currentContent, targetContent);
     console.log('currentContent', currentContent);
     console.log('targetContent', targetContent);
     console.log('differences', differences);
-    
+
     // Calculate delay in ms based on typing speed (characters per second)
     let currentCursorPosition = 0
     const delayMs = 1000 / typingSpeed;
-    
- 
+
+
     for (const diff of differences) {
-      if(!diff.added && !diff.removed) {
+      if (!diff.added && !diff.removed) {
         currentCursorPosition += diff.count!
       }
-      if(diff.removed) {
-          const textToRemove = diff.value;
+      if (diff.removed) {
+        const textToRemove = diff.value;
 
-          // delete  the text from the current position in a loop from the backwards
+        // delete  the text from the current position in a loop from the backwards
 
+        try {
           for (let i = 0; i < textToRemove.length; i++) {
             const edit = new vscode.WorkspaceEdit();
-            
+
             // Need to get current position for each character as it may have changed
             const currentInsertPos = editor.document.positionAt(currentCursorPosition - i + textToRemove.length);
+            console.log('currentInsertPos', currentInsertPos);
             edit.delete(editor.document.uri, new vscode.Range(currentInsertPos, currentInsertPos.translate(0, -1)));
             await vscode.workspace.applyEdit(edit);
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
-                    
+        }
+        catch (e) {
+          console.error('Error deleting text:', e);
+        }
+
+
 
       }
-      if(diff.added) {
+      if (diff.added) {
         const textToAdd = diff.value;
         // Type each character with a delay for realistic effect
-        for (let i = 0; i < textToAdd.length; i++) {
-          const char = textToAdd[i];
+        let i = 0;
+        while (i < textToAdd.length) {
+          let char = textToAdd[i];
           
-          // Create and apply edit to insert single character
+          // Handle \r\n as a single insertion to maintain proper line breaks
+          if (char === '\r' && i + 1 < textToAdd.length && textToAdd[i + 1] === '\n') {
+            char = '\r\n';
+            i += 2; // Skip both characters
+          } else {
+            i += 1; // Normal character, move to next
+          }
+
+          // Create and apply edit to insert character(s)
           const edit = new vscode.WorkspaceEdit();
-          
+
           // Need to get current position for each character as it may have changed
           const currentInsertPos = editor.document.positionAt(currentCursorPosition);
           edit.insert(editor.document.uri, currentInsertPos, char);
           await vscode.workspace.applyEdit(edit);
-          
 
-          currentCursorPosition += 1;
+          currentCursorPosition += char.length;
 
           // Add delay between characters for typing effect
           await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -145,7 +160,7 @@ export async function applyDiffWithTyping(
 
 
     }
-    
+
     // Ensure editor shows the final position
     if (editor.document.lineCount > 0) {
       editor.revealRange(
