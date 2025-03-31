@@ -4,17 +4,14 @@ import * as vscode from 'vscode';
 let typingModeStatusBarItem: vscode.StatusBarItem;
 
 /**
- * Updates the status bar based on current typing mode configuration
+ * Updates the status bar based on current typing speed configuration
  */
 function updateStatusBar(): void {
   const config = vscode.workspace.getConfiguration('presentationSnapshots');
-  const useTypingMode = config.get('useTypingMode', false);
   const typingSpeed = config.get('typingSpeed', 10);
   
-  typingModeStatusBarItem.text = useTypingMode ? `$(keyboard) Typing: ${typingSpeed} cps` : `$(keyboard) Typing: Off`;
-  typingModeStatusBarItem.tooltip = useTypingMode ? 
-    `Typing mode ${useTypingMode ? 'enabled' : 'disabled'} (${typingSpeed} characters per second)` : 
-    'Typing mode disabled';
+  typingModeStatusBarItem.text = `$(keyboard) Typing: ${typingSpeed} cps`;
+  typingModeStatusBarItem.tooltip = `Typing speed set to ${typingSpeed} characters per second`;
   typingModeStatusBarItem.show();
 }
 

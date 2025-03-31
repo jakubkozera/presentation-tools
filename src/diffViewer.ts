@@ -58,22 +58,13 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
     const loadOption = 'Load this snapshot';
     const loadWithTypingOption = 'Load with typing effect';
     
-    // Get the typing mode configuration
+    // Get the typing speed configuration
     const config = vscode.workspace.getConfiguration('presentationSnapshots');
-    const useTypingMode = config.get('useTypingMode', false);
     const typingSpeed = config.get('typingSpeed', 10); // Characters per second
-    
-    // Show appropriate options based on the current typing mode setting
-    let options = [loadOption];
-    if (useTypingMode) {
-      options = [loadWithTypingOption, loadOption];
-    } else {
-      options = [loadOption, loadWithTypingOption];
-    }
     
     const result = await vscode.window.showInformationMessage(
       `You're viewing the differences for snapshot: "${snapshot.description}"`,
-      ...options
+      loadWithTypingOption, loadOption
     );
     
     // If user chooses to load the snapshot

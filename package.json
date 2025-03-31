@@ -28,11 +28,6 @@
     "configuration": {
       "title": "Presentation Snapshots",
       "properties": {
-        "presentationSnapshots.useTypingMode": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable typewriter effect when loading snapshots"
-        },
         "presentationSnapshots.typingSpeed": {
           "type": "number",
           "default": 10,
@@ -160,7 +155,7 @@
         },
         {
           "command": "presentationSnapshots.adjustTypingSpeed",
-          "when": "view == presentationSnapshotsView && config.presentationSnapshots.useTypingMode",
+          "when": "view == presentationSnapshotsView",
           "group": "navigation@3"
         },
         {

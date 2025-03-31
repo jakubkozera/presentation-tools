@@ -107,49 +107,34 @@ export function registerSnapshotCommands(
     }
     
     const config = vscode.workspace.getConfiguration('presentationSnapshots');
-    const useTypingMode = config.get('useTypingMode', false);
     const typingSpeed = config.get('typingSpeed', 10); // Characters per second
     
-    if (useTypingMode) {
-      vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: `Loading snapshot: "${snapshot.description}"`,
-        cancellable: true
-      }, async (progress, token) => {
-        token.onCancellationRequested(() => {
-          vscode.window.showInformationMessage('Snapshot loading cancelled');
-        });
-        
-        try {
-          const currentContent = editor.document.getText();
-          await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
-          const edit = new vscode.WorkspaceEdit();
-          const fullRange = new vscode.Range(
-            editor.document.positionAt(0),
-            editor.document.positionAt(editor.document.getText().length)
-          );
-          edit.replace(editor.document.uri, fullRange, snapshot.content);
-          await vscode.workspace.applyEdit(edit);
-          
-          // Use temporary message for loading notification
-          showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
-        } catch (err) {
-          vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
-        }
+    vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: `Loading snapshot: "${snapshot.description}"`,
+      cancellable: true
+    }, async (progress, token) => {
+      token.onCancellationRequested(() => {
+        vscode.window.showInformationMessage('Snapshot loading cancelled');
       });
-    } else {
-      // Regular instant replace
-      const edit = new vscode.WorkspaceEdit();
-      const fullRange = new vscode.Range(
-        editor.document.positionAt(0),
-        editor.document.positionAt(editor.document.getText().length)
-      );
-      edit.replace(editor.document.uri, fullRange, snapshot.content);
-      await vscode.workspace.applyEdit(edit);
       
-      // Use temporary message for loading notification
-      showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
-    }
+      try {
+        const currentContent = editor.document.getText();
+        await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
+        const edit = new vscode.WorkspaceEdit();
+        const fullRange = new vscode.Range(
+          editor.document.positionAt(0),
+          editor.document.positionAt(editor.document.getText().length)
+        );
+        edit.replace(editor.document.uri, fullRange, snapshot.content);
+        await vscode.workspace.applyEdit(edit);
+        
+        // Use temporary message for loading notification
+        showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
+      } catch (err) {
+        vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
+      }
+    });
   });
   
   // Load snapshot instantly command (for direct clicks on tree items)
