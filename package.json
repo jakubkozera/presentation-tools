@@ -127,17 +127,17 @@
           "group": "1_modification@1"
         },
         {
-          "command": "presentationSnapshots.deleteGroup",
+          "command": "presentationSnapshots.showGroupDiff",
           "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@1"
         },
         {
-          "command": "presentationSnapshots.showGroupDiff",
+          "command": "presentationSnapshots.loadGroupWithTypingEffect",
           "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@2"
         },
         {
-          "command": "presentationSnapshots.loadGroupWithTypingEffect",
+          "command": "presentationSnapshots.deleteGroup",
           "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@3"
         }
