@@ -9,7 +9,7 @@ export function registerHighlightCommands(
   highlightProvider: HighlightProvider
 ): void {
   // Save highlight command
-  const saveHighlightCmd = vscode.commands.registerCommand('presentationHighlights.saveHighlight', async () => {
+  const saveHighlightCmd = vscode.commands.registerCommand('presentationTools.saveHighlight', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -116,17 +116,17 @@ export function registerHighlightCommands(
   });
   
   // Apply highlight command
-  const applyHighlightCmd = vscode.commands.registerCommand('presentationHighlights.applyHighlight', (highlight: Highlight) => {
+  const applyHighlightCmd = vscode.commands.registerCommand('presentationTools.applyHighlight', (highlight: Highlight) => {
     applyHighlight(highlight);
   });
   
   // Clear highlights command
-  const clearHighlightsCmd = vscode.commands.registerCommand('presentationHighlights.clearHighlights', () => {
+  const clearHighlightsCmd = vscode.commands.registerCommand('presentationTools.clearHighlights', () => {
     clearHighlights();
   });
   
   // Delete highlight command
-  const deleteHighlightCmd = vscode.commands.registerCommand('presentationHighlights.deleteHighlight', (highlight: Highlight) => {
+  const deleteHighlightCmd = vscode.commands.registerCommand('presentationTools.deleteHighlight', (highlight: Highlight) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -144,7 +144,7 @@ export function registerHighlightCommands(
   });
 
   // Delete all highlights command
-  const deleteAllHighlightsCmd = vscode.commands.registerCommand('presentationHighlights.deleteAllHighlights', async () => {
+  const deleteAllHighlightsCmd = vscode.commands.registerCommand('presentationTools.deleteAllHighlights', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -177,7 +177,7 @@ export function registerHighlightCommands(
   });
 
   // Export highlights command
-  const exportHighlightsCmd = vscode.commands.registerCommand('presentationHighlights.exportHighlights', async () => {
+  const exportHighlightsCmd = vscode.commands.registerCommand('presentationTools.exportHighlights', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -209,7 +209,7 @@ export function registerHighlightCommands(
   });
   
   // Import highlights command
-  const importHighlightsCmd = vscode.commands.registerCommand('presentationHighlights.importHighlights', async () => {
+  const importHighlightsCmd = vscode.commands.registerCommand('presentationTools.importHighlights', async () => {
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFiles: true,
       canSelectFolders: false,
@@ -243,7 +243,7 @@ export function registerHighlightCommands(
   });
 
   // Change highlight group command
-  const changeHighlightGroupCmd = vscode.commands.registerCommand('presentationHighlights.changeHighlightGroup', async (highlight: Highlight) => {
+  const changeHighlightGroupCmd = vscode.commands.registerCommand('presentationTools.changeHighlightGroup', async (highlight: Highlight) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -319,7 +319,7 @@ export function registerHighlightCommands(
   });
 
   // Delete group command
-  const deleteGroupCmd = vscode.commands.registerCommand('presentationHighlights.deleteGroup', async (group: HighlightGroup) => {
+  const deleteGroupCmd = vscode.commands.registerCommand('presentationTools.deleteHighlightGroup', async (group: HighlightGroup) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -358,7 +358,7 @@ export function registerHighlightCommands(
   });
   
   // Apply group highlights command
-  const applyGroupHighlightsCmd = vscode.commands.registerCommand('presentationHighlights.applyGroupHighlights', async (group: HighlightGroup) => {
+  const applyGroupHighlightsCmd = vscode.commands.registerCommand('presentationTools.applyGroupHighlights', async (group: HighlightGroup) => {
     if (!group.highlights || group.highlights.length === 0) {
       vscode.window.showErrorMessage(`No highlights found in group "${group.label}"`);
       return;

@@ -59,7 +59,7 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
     const loadWithTypingOption = 'Load with typing effect';
     
     // Get the typing speed configuration
-    const config = vscode.workspace.getConfiguration('presentationSnapshots');
+    const config = vscode.workspace.getConfiguration('presentationTools');
     const typingSpeed = config.get('typingSpeed', 10); // Characters per second
     
     const result = await vscode.window.showInformationMessage(
@@ -179,7 +179,7 @@ export async function loadGroupWithTypingEffect(group: SnapshotGroup): Promise<v
     return;
   }
   
-  const config = vscode.workspace.getConfiguration('presentationSnapshots');
+  const config = vscode.workspace.getConfiguration('presentationTools');
   const typingSpeed = config.get('typingSpeed', 10); // Characters per second
   
   // Start progress indicator
@@ -252,19 +252,19 @@ export async function loadGroupWithTypingEffect(group: SnapshotGroup): Promise<v
 export function registerDiffViewerCommands(context: vscode.ExtensionContext): void {
   // Register the showSnapshotDiff command
   const showSnapshotDiffCmd = vscode.commands.registerCommand(
-    'presentationSnapshots.showSnapshotDiff', 
+    'presentationTools.showSnapshotDiff', 
     showSnapshotDiff
   );
   
   // Register the showGroupDiff command
   const showGroupDiffCmd = vscode.commands.registerCommand(
-    'presentationSnapshots.showGroupDiff', 
+    'presentationTools.showGroupDiff', 
     showGroupDiff
   );
   
   // Register the loadGroupWithTypingEffect command
   const loadGroupWithTypingEffectCmd = vscode.commands.registerCommand(
-    'presentationSnapshots.loadGroupWithTypingEffect', 
+    'presentationTools.loadGroupWithTypingEffect', 
     loadGroupWithTypingEffect
   );
   

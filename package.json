@@ -1,6 +1,6 @@
 {
-  "name": "presentation-snapshots",
-  "displayName": "Presentation Snapshots",
+  "name": "presentation-tools",
+  "displayName": "Presentation Tools",
   "description": "Save and restore code snapshots and highlights for smooth presentations",
   "version": "0.1.0",
   "engines": {
@@ -10,40 +10,40 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:presentationSnapshots.saveSnapshot",
-    "onCommand:presentationSnapshots.loadSnapshot",
-    "onCommand:presentationSnapshots.deleteSnapshot",
-    "onCommand:presentationSnapshots.exportSnapshots",
-    "onCommand:presentationSnapshots.importSnapshots",
-    "onCommand:presentationSnapshots.adjustTypingSpeed",
-    "onCommand:presentationSnapshots.showSnapshotDiff",
-    "onCommand:presentationSnapshots.deleteAllSnapshots",
-    "onCommand:presentationSnapshots.changeSnapshotGroup",
-    "onCommand:presentationSnapshots.deleteGroup",
-    "onCommand:presentationSnapshots.showGroupDiff",
-    "onCommand:presentationSnapshots.loadGroupWithTypingEffect",
-    "onCommand:presentationHighlights.saveHighlight",
-    "onCommand:presentationHighlights.applyHighlight",
-    "onCommand:presentationHighlights.clearHighlights",
-    "onCommand:presentationHighlights.deleteHighlight",
-    "onCommand:presentationHighlights.deleteAllHighlights",
-    "onCommand:presentationHighlights.exportHighlights",
-    "onCommand:presentationHighlights.importHighlights",
-    "onCommand:presentationHighlights.changeHighlightGroup",
-    "onCommand:presentationHighlights.deleteGroup",
-    "onCommand:presentationHighlights.applyGroupHighlights"
+    "onCommand:presentationTools.saveSnapshot",
+    "onCommand:presentationTools.loadSnapshot",
+    "onCommand:presentationTools.deleteSnapshot",
+    "onCommand:presentationTools.exportSnapshots",
+    "onCommand:presentationTools.importSnapshots",
+    "onCommand:presentationTools.adjustTypingSpeed",
+    "onCommand:presentationTools.showSnapshotDiff",
+    "onCommand:presentationTools.deleteAllSnapshots",
+    "onCommand:presentationTools.changeSnapshotGroup",
+    "onCommand:presentationTools.deleteSnapshotGroup",
+    "onCommand:presentationTools.showGroupDiff",
+    "onCommand:presentationTools.loadGroupWithTypingEffect",
+    "onCommand:presentationTools.saveHighlight",
+    "onCommand:presentationTools.applyHighlight",
+    "onCommand:presentationTools.clearHighlights",
+    "onCommand:presentationTools.deleteHighlight",
+    "onCommand:presentationTools.deleteAllHighlights",
+    "onCommand:presentationTools.exportHighlights",
+    "onCommand:presentationTools.importHighlights",
+    "onCommand:presentationTools.changeHighlightGroup",
+    "onCommand:presentationTools.deleteHighlightGroup",
+    "onCommand:presentationTools.applyGroupHighlights"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Presentation Snapshots",
+      "title": "Presentation Tools",
       "properties": {
-        "presentationSnapshots.typingSpeed": {
+        "presentationTools.typingSpeed": {
           "type": "number",
           "default": 10,
           "description": "Typing speed in characters per second"
         },
-        "presentationHighlights.defaultHighlightColor": {
+        "presentationTools.defaultHighlightColor": {
           "type": "string",
           "default": "rgba(255, 255, 0, 0.3)",
           "description": "Default color for code highlights (CSS color format)"
@@ -52,110 +52,110 @@
     },
     "commands": [
       {
-        "command": "presentationSnapshots.saveSnapshot",
+        "command": "presentationTools.saveSnapshot",
         "title": "Presentation: Save Code Snapshot"
       },
       {
-        "command": "presentationSnapshots.loadSnapshot",
+        "command": "presentationTools.loadSnapshot",
         "title": "Load Snapshot",
         "icon": "$(play)"
       },
       {
-        "command": "presentationSnapshots.deleteSnapshot",
+        "command": "presentationTools.deleteSnapshot",
         "title": "Delete Snapshot",
         "icon": "$(x)"
       },
       {
-        "command": "presentationSnapshots.showSnapshotDiff",
+        "command": "presentationTools.showSnapshotDiff",
         "title": "Show Diff",
         "icon": "$(diff)"
       },
       {
-        "command": "presentationSnapshots.exportSnapshots",
+        "command": "presentationTools.exportSnapshots",
         "title": "Export All Snapshots",
         "icon": "$(repo-push)"
       },
       {
-        "command": "presentationSnapshots.importSnapshots",
+        "command": "presentationTools.importSnapshots",
         "title": "Import Snapshots",
         "icon": "$(repo-pull)"
       },
       {
-        "command": "presentationSnapshots.adjustTypingSpeed",
+        "command": "presentationTools.adjustTypingSpeed",
         "title": "Adjust Typing Speed",
         "icon": "$(run-all)"
       },
       {
-        "command": "presentationSnapshots.deleteAllSnapshots",
+        "command": "presentationTools.deleteAllSnapshots",
         "title": "Delete All Snapshots",
         "icon": "$(trash)"
       },
       {
-        "command": "presentationSnapshots.changeSnapshotGroup",
+        "command": "presentationTools.changeSnapshotGroup",
         "title": "Move to Group",
         "icon": "$(folder)"
       },
       {
-        "command": "presentationSnapshots.deleteGroup",
-        "title": "Delete Group",
+        "command": "presentationTools.deleteSnapshotGroup",
+        "title": "Delete Snapshot Group",
         "icon": "$(trash)"
       },
       {
-        "command": "presentationSnapshots.showGroupDiff",
+        "command": "presentationTools.showGroupDiff",
         "title": "Show Group Diff",
         "icon": "$(diff)"
       },
       {
-        "command": "presentationSnapshots.loadGroupWithTypingEffect",
+        "command": "presentationTools.loadGroupWithTypingEffect",
         "title": "Run Group Presentation",
         "icon": "$(play)"
       },
       {
-        "command": "presentationHighlights.saveHighlight",
+        "command": "presentationTools.saveHighlight",
         "title": "Presentation: Save Code Highlight"
       },
       {
-        "command": "presentationHighlights.applyHighlight",
+        "command": "presentationTools.applyHighlight",
         "title": "Apply Highlight",
         "icon": "$(paintbrush)"
       },
       {
-        "command": "presentationHighlights.clearHighlights",
+        "command": "presentationTools.clearHighlights",
         "title": "Clear All Highlights",
         "icon": "$(clear-all)"
       },
       {
-        "command": "presentationHighlights.deleteHighlight",
+        "command": "presentationTools.deleteHighlight",
         "title": "Delete Highlight",
         "icon": "$(x)"
       },
       {
-        "command": "presentationHighlights.exportHighlights",
+        "command": "presentationTools.exportHighlights",
         "title": "Export All Highlights",
         "icon": "$(repo-push)"
       },
       {
-        "command": "presentationHighlights.importHighlights",
+        "command": "presentationTools.importHighlights",
         "title": "Import Highlights",
         "icon": "$(repo-pull)"
       },
       {
-        "command": "presentationHighlights.deleteAllHighlights",
+        "command": "presentationTools.deleteAllHighlights",
         "title": "Delete All Highlights",
         "icon": "$(trash)"
       },
       {
-        "command": "presentationHighlights.changeHighlightGroup",
+        "command": "presentationTools.changeHighlightGroup",
         "title": "Move to Group",
         "icon": "$(folder)"
       },
       {
-        "command": "presentationHighlights.deleteGroup",
-        "title": "Delete Group",
+        "command": "presentationTools.deleteHighlightGroup",
+        "title": "Delete Highlight Group",
         "icon": "$(trash)"
       },
       {
-        "command": "presentationHighlights.applyGroupHighlights",
+        "command": "presentationTools.applyGroupHighlights",
         "title": "Apply Group Highlights",
         "icon": "$(paintbrush)"
       }
@@ -163,11 +163,11 @@
     "views": {
       "explorer": [
         {
-          "id": "presentationSnapshotsView",
+          "id": "presentationToolsSnapshotsView",
           "name": "Presentation Snapshots"
         },
         {
-          "id": "presentationHighlightsView",
+          "id": "presentationToolsHighlightsView",
           "name": "Presentation Highlights"
         }
       ]
@@ -175,116 +175,116 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "presentationSnapshots.showSnapshotDiff",
-          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "command": "presentationTools.showSnapshotDiff",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshot",
           "group": "inline@1"
         },
         {
-          "command": "presentationSnapshots.loadSnapshot",
-          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "command": "presentationTools.loadSnapshot",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshot",
           "group": "inline@2"
         },
         {
-          "command": "presentationSnapshots.deleteSnapshot",
-          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "command": "presentationTools.deleteSnapshot",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshot",
           "group": "inline@3"
         },
         {
-          "command": "presentationSnapshots.changeSnapshotGroup",
-          "when": "view == presentationSnapshotsView && viewItem == snapshot",
+          "command": "presentationTools.changeSnapshotGroup",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshot",
           "group": "1_modification@1"
         },
         {
-          "command": "presentationSnapshots.showGroupDiff",
-          "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
+          "command": "presentationTools.showGroupDiff",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@1"
         },
         {
-          "command": "presentationSnapshots.loadGroupWithTypingEffect",
-          "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
+          "command": "presentationTools.loadGroupWithTypingEffect",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@2"
         },
         {
-          "command": "presentationSnapshots.deleteGroup",
-          "when": "view == presentationSnapshotsView && viewItem == snapshotGroup",
+          "command": "presentationTools.deleteSnapshotGroup",
+          "when": "view == presentationToolsSnapshotsView && viewItem == snapshotGroup",
           "group": "inline@3"
         },
         {
-          "command": "presentationHighlights.applyHighlight",
-          "when": "view == presentationHighlightsView && viewItem == highlight",
+          "command": "presentationTools.applyHighlight",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlight",
           "group": "inline@1"
         },
         {
-          "command": "presentationHighlights.deleteHighlight",
-          "when": "view == presentationHighlightsView && viewItem == highlight",
+          "command": "presentationTools.deleteHighlight",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlight",
           "group": "inline@2"
         },
         {
-          "command": "presentationHighlights.changeHighlightGroup",
-          "when": "view == presentationHighlightsView && viewItem == highlight",
+          "command": "presentationTools.changeHighlightGroup",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlight",
           "group": "1_modification@1"
         },
         {
-          "command": "presentationHighlights.applyGroupHighlights",
-          "when": "view == presentationHighlightsView && viewItem == highlightGroup",
+          "command": "presentationTools.applyGroupHighlights",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlightGroup",
           "group": "inline@1"
         },
         {
-          "command": "presentationHighlights.deleteGroup",
-          "when": "view == presentationHighlightsView && viewItem == highlightGroup",
+          "command": "presentationTools.deleteHighlightGroup",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlightGroup",
           "group": "inline@2"
         }
       ],
       "view/title": [
         {
-          "command": "presentationSnapshots.exportSnapshots",
-          "when": "view == presentationSnapshotsView",
+          "command": "presentationTools.exportSnapshots",
+          "when": "view == presentationToolsSnapshotsView",
           "group": "navigation@1"
         },
         {
-          "command": "presentationSnapshots.importSnapshots",
-          "when": "view == presentationSnapshotsView",
+          "command": "presentationTools.importSnapshots",
+          "when": "view == presentationToolsSnapshotsView",
           "group": "navigation@2"
         },
         {
-          "command": "presentationSnapshots.adjustTypingSpeed",
-          "when": "view == presentationSnapshotsView",
+          "command": "presentationTools.adjustTypingSpeed",
+          "when": "view == presentationToolsSnapshotsView",
           "group": "navigation@3"
         },
         {
-          "command": "presentationSnapshots.deleteAllSnapshots",
-          "when": "view == presentationSnapshotsView && presentationSnapshotsHasSnapshots",
+          "command": "presentationTools.deleteAllSnapshots",
+          "when": "view == presentationToolsSnapshotsView && presentationToolsHasSnapshots",
           "group": "navigation@4"
         },
         {
-          "command": "presentationHighlights.exportHighlights",
-          "when": "view == presentationHighlightsView",
+          "command": "presentationTools.exportHighlights",
+          "when": "view == presentationToolsHighlightsView",
           "group": "navigation@1"
         },
         {
-          "command": "presentationHighlights.importHighlights",
-          "when": "view == presentationHighlightsView",
+          "command": "presentationTools.importHighlights",
+          "when": "view == presentationToolsHighlightsView",
           "group": "navigation@2"
         },
         {
-          "command": "presentationHighlights.clearHighlights",
-          "when": "view == presentationHighlightsView",
+          "command": "presentationTools.clearHighlights",
+          "when": "view == presentationToolsHighlightsView",
           "group": "navigation@3"
         },
         {
-          "command": "presentationHighlights.deleteAllHighlights",
-          "when": "view == presentationHighlightsView && presentationHighlightsHasHighlights",
+          "command": "presentationTools.deleteAllHighlights",
+          "when": "view == presentationToolsHighlightsView && presentationToolsHasHighlights",
           "group": "navigation@4"
         }
       ],
       "editor/context": [
         {
-          "command": "presentationSnapshots.saveSnapshot",
+          "command": "presentationTools.saveSnapshot",
           "group": "presentation@1",
           "when": "editorTextFocus"
         },
         {
-          "command": "presentationHighlights.saveHighlight",
+          "command": "presentationTools.saveHighlight",
           "group": "presentation@2",
           "when": "editorHasSelection && editorTextFocus"
         }
@@ -292,19 +292,19 @@
     },
     "keybindings": [
       {
-        "command": "presentationSnapshots.saveSnapshot",
+        "command": "presentationTools.saveSnapshot",
         "key": "ctrl+shift+s",
         "mac": "cmd+shift+s",
         "when": "editorTextFocus"
       },
       {
-        "command": "presentationHighlights.saveHighlight",
+        "command": "presentationTools.saveHighlight",
         "key": "ctrl+shift+h",
         "mac": "cmd+shift+h",
         "when": "editorHasSelection && editorTextFocus"
       },
       {
-        "command": "presentationHighlights.clearHighlights",
+        "command": "presentationTools.clearHighlights",
         "key": "ctrl+shift+c",
         "mac": "cmd+shift+c",
         "when": "editorTextFocus"

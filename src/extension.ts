@@ -3,7 +3,7 @@ import { SnapshotProvider, SnapshotGroup } from './snapshotProvider';
 import { registerSnapshotCommands } from './snapshotCommands';
 import { registerDiffViewerCommands } from './diffViewer';
 import { initializeStatusBar } from './statusBar';
-// Import new highlight-related modules
+// Import highlight-related modules
 import { HighlightProvider, HighlightGroup } from './highlightProvider';
 import { registerHighlightCommands } from './highlightCommands';
 
@@ -12,13 +12,13 @@ import { registerHighlightCommands } from './highlightCommands';
  * @param context The extension context
  */
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Presentation Snapshots extension is now active');
+  console.log('Presentation Tools extension is now active');
   
   // Create the snapshot tree view provider
   const snapshotProvider = new SnapshotProvider();
   
   // Create the tree view with drag and drop support
-  const snapshotTreeView = vscode.window.createTreeView('presentationSnapshotsView', {
+  const snapshotTreeView = vscode.window.createTreeView('presentationToolsSnapshotsView', {
     treeDataProvider: snapshotProvider,
     dragAndDropController: snapshotProvider
   });
@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
   const highlightProvider = new HighlightProvider();
   
   // Create the highlight tree view with drag and drop support
-  const highlightTreeView = vscode.window.createTreeView('presentationHighlightsView', {
+  const highlightTreeView = vscode.window.createTreeView('presentationToolsHighlightsView', {
     treeDataProvider: highlightProvider,
     dragAndDropController: highlightProvider
   });

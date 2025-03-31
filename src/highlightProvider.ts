@@ -15,8 +15,8 @@ export class HighlightGroup {
 // Tree view for highlights
 export class HighlightProvider implements vscode.TreeDataProvider<HighlightTreeItem>, vscode.TreeDragAndDropController<HighlightTreeItem> {
   // Drag and drop capabilities
-  readonly dropMimeTypes = ['application/vnd.code.tree.presentationHighlightsView'];
-  readonly dragMimeTypes = ['application/vnd.code.tree.presentationHighlightsView'];
+  readonly dropMimeTypes = ['application/vnd.code.tree.presentationToolsHighlightsView'];
+  readonly dragMimeTypes = ['application/vnd.code.tree.presentationToolsHighlightsView'];
   
   // Event emitter for tree data changes
   private _onDidChangeTreeData: vscode.EventEmitter<HighlightTreeItem | undefined> = new vscode.EventEmitter<HighlightTreeItem | undefined>();
@@ -38,7 +38,7 @@ export class HighlightProvider implements vscode.TreeDataProvider<HighlightTreeI
     let hasHighlights = Object.values(fileHighlights).some(highlights => highlights.length > 0);
     
     // Update the context variable that the when clause uses
-    vscode.commands.executeCommand('setContext', 'presentationHighlightsHasHighlights', hasHighlights);
+    vscode.commands.executeCommand('setContext', 'presentationToolsHasHighlights', hasHighlights);
   }
   
   getTreeItem(element: HighlightTreeItem): vscode.TreeItem {
@@ -62,7 +62,7 @@ export class HighlightProvider implements vscode.TreeDataProvider<HighlightTreeI
       
       // Add a direct command to instantly apply the highlight when clicking on the tree item
       item.command = {
-        command: 'presentationHighlights.applyHighlight',
+        command: 'presentationTools.applyHighlight',
         title: 'Apply Highlight',
         arguments: [highlight]
       };
@@ -154,14 +154,14 @@ export class HighlightProvider implements vscode.TreeDataProvider<HighlightTreeI
     }
     
     // Set the data for the drag operation
-    dataTransfer.set('application/vnd.code.tree.presentationHighlightsView', 
+    dataTransfer.set('application/vnd.code.tree.presentationToolsHighlightsView', 
       new vscode.DataTransferItem(highlights));
   }
   
   // Handle drop
   async handleDrop(target: HighlightTreeItem | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
     // Get the dragged highlights
-    const transferItem = dataTransfer.get('application/vnd.code.tree.presentationHighlightsView');
+    const transferItem = dataTransfer.get('application/vnd.code.tree.presentationToolsHighlightsView');
     if (!transferItem) {
       return;
     }

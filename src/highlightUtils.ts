@@ -117,7 +117,7 @@ export async function applyHighlight(highlight: Highlight, editor?: vscode.TextE
   }
   
   // Get configuration
-  const config = vscode.workspace.getConfiguration('presentationHighlights');
+  const config = vscode.workspace.getConfiguration('presentationTools');
   const defaultColor = config.get('defaultHighlightColor', 'rgba(255, 255, 0, 0.3)'); // Yellow with 30% opacity by default
   
   // Create decoration type

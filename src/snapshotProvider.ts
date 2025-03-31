@@ -15,8 +15,8 @@ export class SnapshotGroup {
 // Tree view for snapshots
 export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem>, vscode.TreeDragAndDropController<TreeItem> {
   // Drag and drop capabilities
-  readonly dropMimeTypes = ['application/vnd.code.tree.presentationSnapshotsView'];
-  readonly dragMimeTypes = ['application/vnd.code.tree.presentationSnapshotsView'];
+  readonly dropMimeTypes = ['application/vnd.code.tree.presentationToolsSnapshotsView'];
+  readonly dragMimeTypes = ['application/vnd.code.tree.presentationToolsSnapshotsView'];
   
   // Event emitter for tree data changes
   private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined> = new vscode.EventEmitter<TreeItem | undefined>();
@@ -44,7 +44,7 @@ export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem>, vsco
     }
     
     // Update the context variable that the when clause uses
-    vscode.commands.executeCommand('setContext', 'presentationSnapshotsHasSnapshots', hasSnapshots);
+    vscode.commands.executeCommand('setContext', 'presentationToolsHasSnapshots', hasSnapshots);
   }
   
   getTreeItem(element: TreeItem): vscode.TreeItem {
@@ -57,7 +57,7 @@ export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem>, vsco
       
       // Add a direct command to instantly load the snapshot when clicking on the tree item
       item.command = {
-        command: 'presentationSnapshots.loadSnapshotInstantly',
+        command: 'presentationTools.loadSnapshotInstantly',
         title: 'Load Snapshot Instantly',
         arguments: [snapshot]
       };
@@ -153,7 +153,7 @@ export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem>, vsco
     }
     
     // Set the data for the drag operation
-    dataTransfer.set('application/vnd.code.tree.presentationSnapshotsView', 
+    dataTransfer.set('application/vnd.code.tree.presentationToolsSnapshotsView', 
       new vscode.DataTransferItem(snapshots));
   }
   
@@ -170,7 +170,7 @@ export class SnapshotProvider implements vscode.TreeDataProvider<TreeItem>, vsco
     }
     
     // Get the dragged snapshots
-    const transferItem = dataTransfer.get('application/vnd.code.tree.presentationSnapshotsView');
+    const transferItem = dataTransfer.get('application/vnd.code.tree.presentationToolsSnapshotsView');
     if (!transferItem) {
       return;
     }

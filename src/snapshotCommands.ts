@@ -9,7 +9,7 @@ export function registerSnapshotCommands(
   snapshotProvider: SnapshotProvider
 ): void {
   // Save snapshot command
-  const saveSnapshotCmd = vscode.commands.registerCommand('presentationSnapshots.saveSnapshot', async () => {
+  const saveSnapshotCmd = vscode.commands.registerCommand('presentationTools.saveSnapshot', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -99,14 +99,14 @@ export function registerSnapshotCommands(
   });
   
   // Load snapshot command
-  const loadSnapshotCmd = vscode.commands.registerCommand('presentationSnapshots.loadSnapshot', async (snapshot: Snapshot) => {
+  const loadSnapshotCmd = vscode.commands.registerCommand('presentationTools.loadSnapshot', async (snapshot: Snapshot) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
       return;
     }
     
-    const config = vscode.workspace.getConfiguration('presentationSnapshots');
+    const config = vscode.workspace.getConfiguration('presentationTools');
     const typingSpeed = config.get('typingSpeed', 10); // Characters per second
     
     vscode.window.withProgress({
@@ -142,7 +142,7 @@ export function registerSnapshotCommands(
   });
   
   // Load snapshot instantly command (for direct clicks on tree items)
-  const loadSnapshotInstantlyCmd = vscode.commands.registerCommand('presentationSnapshots.loadSnapshotInstantly', async (snapshot: Snapshot) => {
+  const loadSnapshotInstantlyCmd = vscode.commands.registerCommand('presentationTools.loadSnapshotInstantly', async (snapshot: Snapshot) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -163,7 +163,7 @@ export function registerSnapshotCommands(
   });
   
   // Delete snapshot command
-  const deleteSnapshotCmd = vscode.commands.registerCommand('presentationSnapshots.deleteSnapshot', (snapshot: Snapshot) => {
+  const deleteSnapshotCmd = vscode.commands.registerCommand('presentationTools.deleteSnapshot', (snapshot: Snapshot) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -181,7 +181,7 @@ export function registerSnapshotCommands(
   });
 
   // Delete all snapshots command
-  const deleteAllSnapshotsCmd = vscode.commands.registerCommand('presentationSnapshots.deleteAllSnapshots', async () => {
+  const deleteAllSnapshotsCmd = vscode.commands.registerCommand('presentationTools.deleteAllSnapshots', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -211,7 +211,7 @@ export function registerSnapshotCommands(
   });
 
   // Export snapshots command
-  const exportSnapshotsCmd = vscode.commands.registerCommand('presentationSnapshots.exportSnapshots', async () => {
+  const exportSnapshotsCmd = vscode.commands.registerCommand('presentationTools.exportSnapshots', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -243,7 +243,7 @@ export function registerSnapshotCommands(
   });
   
   // Import snapshots command
-  const importSnapshotsCmd = vscode.commands.registerCommand('presentationSnapshots.importSnapshots', async () => {
+  const importSnapshotsCmd = vscode.commands.registerCommand('presentationTools.importSnapshots', async () => {
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFiles: true,
       canSelectFolders: false,
@@ -277,7 +277,7 @@ export function registerSnapshotCommands(
   });
 
   // Change snapshot group command
-  const changeSnapshotGroupCmd = vscode.commands.registerCommand('presentationSnapshots.changeSnapshotGroup', async (snapshot: Snapshot) => {
+  const changeSnapshotGroupCmd = vscode.commands.registerCommand('presentationTools.changeSnapshotGroup', async (snapshot: Snapshot) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');
@@ -353,7 +353,7 @@ export function registerSnapshotCommands(
   });
 
   // Delete group command
-  const deleteGroupCmd = vscode.commands.registerCommand('presentationSnapshots.deleteGroup', async (group: SnapshotGroup) => {
+  const deleteGroupCmd = vscode.commands.registerCommand('presentationTools.deleteSnapshotGroup', async (group: SnapshotGroup) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active editor found');

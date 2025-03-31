@@ -7,7 +7,7 @@ let typingModeStatusBarItem: vscode.StatusBarItem;
  * Updates the status bar based on current typing speed configuration
  */
 function updateStatusBar(): void {
-  const config = vscode.workspace.getConfiguration('presentationSnapshots');
+  const config = vscode.workspace.getConfiguration('presentationTools');
   const typingSpeed = config.get('typingSpeed', 10);
   
   typingModeStatusBarItem.text = `$(keyboard) Typing: ${typingSpeed} cps`;
@@ -19,7 +19,7 @@ function updateStatusBar(): void {
  * Adjusts the typing speed
  */
 async function adjustTypingSpeed(): Promise<void> {
-  const config = vscode.workspace.getConfiguration('presentationSnapshots');
+  const config = vscode.workspace.getConfiguration('presentationTools');
   const currentSpeed = config.get('typingSpeed', 10);
   
   const result = await vscode.window.showInputBox({
@@ -52,12 +52,12 @@ export function initializeStatusBar(context: vscode.ExtensionContext): void {
   updateStatusBar();
   
   // Register commands
-  const adjustTypingSpeedCmd = vscode.commands.registerCommand('presentationSnapshots.adjustTypingSpeed', adjustTypingSpeed);
+  const adjustTypingSpeedCmd = vscode.commands.registerCommand('presentationTools.adjustTypingSpeed', adjustTypingSpeed);
   
   // Listen for configuration changes
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration('presentationSnapshots')) {
+      if (e.affectsConfiguration('presentationTools')) {
         updateStatusBar();
       }
     }),
