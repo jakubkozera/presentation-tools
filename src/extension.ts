@@ -3,6 +3,9 @@ import { SnapshotProvider, SnapshotGroup } from './snapshotProvider';
 import { registerSnapshotCommands } from './snapshotCommands';
 import { registerDiffViewerCommands } from './diffViewer';
 import { initializeStatusBar } from './statusBar';
+// Import new highlight-related modules
+import { HighlightProvider, HighlightGroup } from './highlightProvider';
+import { registerHighlightCommands } from './highlightCommands';
 
 /**
  * This method is called when the extension is activated
@@ -15,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
   const snapshotProvider = new SnapshotProvider();
   
   // Create the tree view with drag and drop support
-  const treeView = vscode.window.createTreeView('presentationSnapshotsView', {
+  const snapshotTreeView = vscode.window.createTreeView('presentationSnapshotsView', {
     treeDataProvider: snapshotProvider,
     dragAndDropController: snapshotProvider
   });
@@ -29,8 +32,20 @@ export function activate(context: vscode.ExtensionContext) {
   // Initialize the status bar and related commands
   initializeStatusBar(context);
   
-  // Add tree view to subscriptions
-  context.subscriptions.push(treeView);
+  // Create the highlight tree view provider
+  const highlightProvider = new HighlightProvider();
+  
+  // Create the highlight tree view with drag and drop support
+  const highlightTreeView = vscode.window.createTreeView('presentationHighlightsView', {
+    treeDataProvider: highlightProvider,
+    dragAndDropController: highlightProvider
+  });
+  
+  // Register highlight-related commands
+  registerHighlightCommands(context, highlightProvider);
+  
+  // Add tree views to subscriptions
+  context.subscriptions.push(snapshotTreeView, highlightTreeView);
 }
 
 /**
