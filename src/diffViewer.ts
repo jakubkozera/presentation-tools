@@ -94,10 +94,13 @@ export async function showSnapshotDiff(snapshot: Snapshot): Promise<void> {
           
           try {
             const currentContent = editor.document.getText();
-            await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
+            await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed, token);
             
-            // Use temporary message for loading notification
-            showTemporaryMessage(`Loaded snapshot: "${snapshot.description}" with typing effect`);
+            // Only show completion message if not cancelled
+            if (!token.isCancellationRequested) {
+              // Use temporary message for loading notification
+              showTemporaryMessage(`Loaded snapshot: "${snapshot.description}" with typing effect`);
+            }
           } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             vscode.window.showErrorMessage(`Error loading snapshot: ${errorMessage}`);
@@ -206,20 +209,26 @@ export async function loadGroupWithTypingEffect(group: SnapshotGroup): Promise<v
           message: `Step ${i + 1}/${group.snapshots.length}: "${snapshot.description}"`
         });
         
-        // Apply current snapshot
-        await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
-        
-        // Update current content for next iteration
-        currentContent = snapshot.content;
-        
-        // Pause briefly between snapshots if there are more to come
-        if (i < group.snapshots.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second pause between snapshots
-        }
-        
-        // Check if operation was cancelled
+        // Check if cancelled before applying snapshot
         if (token.isCancellationRequested) {
           return;
+        }
+        
+        // Apply current snapshot with cancellation token
+        await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed, token);
+        
+        // Only update content and continue if not cancelled
+        if (!token.isCancellationRequested) {
+          // Update current content for next iteration
+          currentContent = snapshot.content;
+          
+          // Pause briefly between snapshots if there are more to come
+          if (i < group.snapshots.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second pause between snapshots
+          }
+        } else {
+          // Exit the loop if cancelled
+          break;
         }
       }
       

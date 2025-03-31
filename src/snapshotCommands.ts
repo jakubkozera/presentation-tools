@@ -120,17 +120,21 @@ export function registerSnapshotCommands(
       
       try {
         const currentContent = editor.document.getText();
-        await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed);
-        const edit = new vscode.WorkspaceEdit();
-        const fullRange = new vscode.Range(
-          editor.document.positionAt(0),
-          editor.document.positionAt(editor.document.getText().length)
-        );
-        edit.replace(editor.document.uri, fullRange, snapshot.content);
-        await vscode.workspace.applyEdit(edit);
+        await applyDiffWithTyping(editor, currentContent, snapshot.content, typingSpeed, token);
         
-        // Use temporary message for loading notification
-        showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
+        // Only apply the final edit if not cancelled
+        if (!token.isCancellationRequested) {
+          const edit = new vscode.WorkspaceEdit();
+          const fullRange = new vscode.Range(
+            editor.document.positionAt(0),
+            editor.document.positionAt(editor.document.getText().length)
+          );
+          edit.replace(editor.document.uri, fullRange, snapshot.content);
+          await vscode.workspace.applyEdit(edit);
+          
+          // Use temporary message for loading notification
+          showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
+        }
       } catch (err) {
         vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
       }

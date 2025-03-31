@@ -71,12 +71,14 @@ async function restoreAutoFormatting(originalSettings: FormattingSettings): Prom
  * @param currentContent Current content of the document
  * @param targetContent Target content to transform to
  * @param typingSpeed Characters per second for the typing effect
+ * @param token Optional cancellation token to stop typing effect
  */
 export async function applyDiffWithTyping(
   editor: vscode.TextEditor,
   currentContent: string,
   targetContent: string,
-  typingSpeed: number
+  typingSpeed: number,
+  token?: vscode.CancellationToken
 ): Promise<void> {
   // Disable auto-formatting before we start typing
   let originalSettings: FormattingSettings | null = null;
@@ -101,16 +103,27 @@ export async function applyDiffWithTyping(
 
 
     for (const diff of differences) {
+      // Check for cancellation request before each chunk
+      if (token?.isCancellationRequested) {
+        console.log('Typing cancelled by user');
+        return;
+      }
+
       if (!diff.added && !diff.removed) {
         currentCursorPosition += diff.count!
       }
       if (diff.removed) {
         const textToRemove = diff.value;
 
-        // delete  the text from the current position in a loop from the backwards
-
+        // delete the text from the current position in a loop from the backwards
         try {
           for (let i = 0; i < textToRemove.length; i++) {
+            // Check for cancellation request before each character deletion
+            if (token?.isCancellationRequested) {
+              console.log('Typing cancelled by user during deletion');
+              return;
+            }
+
             const edit = new vscode.WorkspaceEdit();
 
             // Need to get current position for each character as it may have changed
@@ -130,6 +143,12 @@ export async function applyDiffWithTyping(
         // Type each character with a delay for realistic effect
         let i = 0;
         while (i < textToAdd.length) {
+          // Check for cancellation request before each character insertion
+          if (token?.isCancellationRequested) {
+            console.log('Typing cancelled by user during insertion');
+            return;
+          }
+
           let char = textToAdd[i];
           
           // Handle \r\n as a single insertion to maintain proper line breaks
@@ -154,8 +173,6 @@ export async function applyDiffWithTyping(
           await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
-
-
     }
 
     // Ensure editor shows the final position
