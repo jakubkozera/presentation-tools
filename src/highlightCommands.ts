@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { Highlight, fileHighlights, clearHighlights, applyHighlight, createHighlightFromSelection, clearSingleHighlightFromEditor } from './highlightUtils';
+import { Highlight, fileHighlights, clearHighlights, applyHighlight, createHighlightFromSelection, clearSingleHighlightFromEditor, isHighlightApplied } from './highlightUtils';
 import { showTemporaryMessage } from './utils';
 import { HighlightGroup, HighlightProvider } from './highlightProvider';
 
@@ -421,6 +421,57 @@ export function registerHighlightCommands(
     highlightProvider.refresh();
   });
 
+  // Clear group highlights command
+  const clearGroupHighlightsCmd = vscode.commands.registerCommand('presentationTools.clearGroupHighlights', async (group: HighlightGroup) => {
+    if (!group.highlights || group.highlights.length === 0) {
+      vscode.window.showErrorMessage(`No highlights found in group "${group.label}"`);
+      return;
+    }
+    
+    // Get a list of unique file paths in this group
+    const filePaths = new Set<string>();
+    group.highlights.forEach(h => filePaths.add(h.filePath));
+    
+    // Get list of applied highlight IDs from this group
+    const highlightIds = new Set(group.highlights.map(h => h.id));
+    
+    // Clear applied highlights from each file
+    for (const filePath of filePaths) {
+      try {
+        // Open the file if it's not already open
+        const document = await vscode.workspace.openTextDocument(filePath);
+        const editor = await vscode.window.showTextDocument(document);
+        
+        // Only clear highlights that belong to this group
+        const appliedSet = new Set<string>();
+        fileHighlights[filePath]?.forEach(h => {
+          // If highlight is in this file but not in this group, and it's currently applied,
+          // we want to keep it applied after clearing the group highlights
+          if (!highlightIds.has(h.id) && isHighlightApplied(h)) {
+            appliedSet.add(h.id);
+          }
+        });
+        
+        // Clear all decorations
+        clearHighlights(editor);
+        
+        // Re-apply highlights that should remain visible
+        for (const h of fileHighlights[filePath] || []) {
+          if (appliedSet.has(h.id)) {
+            await applyHighlight(h, editor);
+          }
+        }
+      } catch (error) {
+        vscode.window.showWarningMessage(`Could not clear highlights in file ${filePath}: ${error}`);
+      }
+    }
+    
+    showTemporaryMessage(`Cleared all highlights from group "${group.label}"`);
+    
+    // Refresh the tree view to update UI state
+    highlightProvider.refresh();
+  });
+
   // Register all commands
   context.subscriptions.push(
     saveHighlightCmd,
@@ -433,6 +484,7 @@ export function registerHighlightCommands(
     importHighlightsCmd,
     changeHighlightGroupCmd,
     deleteGroupCmd,
-    applyGroupHighlightsCmd
+    applyGroupHighlightsCmd,
+    clearGroupHighlightsCmd
   );
 }

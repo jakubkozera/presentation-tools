@@ -26,6 +26,7 @@
     "onCommand:presentationTools.applyHighlight",
     "onCommand:presentationTools.clearHighlights",
     "onCommand:presentationTools.clearSingleHighlight",
+    "onCommand:presentationTools.clearGroupHighlights",
     "onCommand:presentationTools.deleteHighlight",
     "onCommand:presentationTools.deleteAllHighlights",
     "onCommand:presentationTools.exportHighlights",
@@ -118,7 +119,7 @@
       {
         "command": "presentationTools.applyHighlight",
         "title": "Apply Highlight",
-        "icon": "$(paintbrush)"
+        "icon": "$(paintcan)"
       },
       {
         "command": "presentationTools.clearSingleHighlight",
@@ -163,7 +164,12 @@
       {
         "command": "presentationTools.applyGroupHighlights",
         "title": "Apply Group Highlights",
-        "icon": "$(paintbrush)"
+        "icon": "$(paintcan)"
+      },
+      {
+        "command": "presentationTools.clearGroupHighlights",
+        "title": "Clear Group Highlights",
+        "icon": "$(discard)"
       }
     ],
     "views": {
@@ -241,9 +247,14 @@
           "group": "inline@1"
         },
         {
-          "command": "presentationTools.deleteHighlightGroup",
+          "command": "presentationTools.clearGroupHighlights",
           "when": "view == presentationToolsHighlightsView && viewItem == highlightGroup",
           "group": "inline@2"
+        },
+        {
+          "command": "presentationTools.deleteHighlightGroup",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlightGroup",
+          "group": "inline@3"
         }
       ],
       "view/title": [
