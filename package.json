@@ -25,6 +25,7 @@
     "onCommand:presentationTools.saveHighlight",
     "onCommand:presentationTools.applyHighlight",
     "onCommand:presentationTools.clearHighlights",
+    "onCommand:presentationTools.clearSingleHighlight",
     "onCommand:presentationTools.deleteHighlight",
     "onCommand:presentationTools.deleteAllHighlights",
     "onCommand:presentationTools.exportHighlights",
@@ -40,7 +41,7 @@
       "properties": {
         "presentationTools.typingSpeed": {
           "type": "number",
-          "default": 10,
+          "default": 20,
           "description": "Typing speed in characters per second"
         },
         "presentationTools.defaultHighlightColor": {
@@ -118,6 +119,11 @@
         "command": "presentationTools.applyHighlight",
         "title": "Apply Highlight",
         "icon": "$(paintbrush)"
+      },
+      {
+        "command": "presentationTools.clearSingleHighlight",
+        "title": "Clear Highlight",
+        "icon": "$(discard)"
       },
       {
         "command": "presentationTools.clearHighlights",
@@ -215,13 +221,18 @@
           "group": "inline@1"
         },
         {
+          "command": "presentationTools.clearSingleHighlight",
+          "when": "view == presentationToolsHighlightsView && viewItem == highlightApplied",
+          "group": "inline@1"
+        },
+        {
           "command": "presentationTools.deleteHighlight",
-          "when": "view == presentationToolsHighlightsView && viewItem == highlight",
-          "group": "inline@2"
+          "when": "view == presentationToolsHighlightsView && (viewItem == highlight || viewItem == highlightApplied)",
+          "group": "inline@3"
         },
         {
           "command": "presentationTools.changeHighlightGroup",
-          "when": "view == presentationToolsHighlightsView && viewItem == highlight",
+          "when": "view == presentationToolsHighlightsView && (viewItem == highlight || viewItem == highlightApplied)",
           "group": "1_modification@1"
         },
         {

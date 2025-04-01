@@ -68,6 +68,50 @@ export function groupHighlights(highlights: Highlight[]): Map<string, Highlight[
 // Store active decorations
 const activeDecorations = new Map<string, vscode.TextEditorDecorationType[]>();
 
+// Track which highlights are currently applied (by id)
+const appliedHighlights = new Map<string, Set<string>>();
+
+// Function to clear a single highlight from an editor
+export function clearSingleHighlightFromEditor(highlight: Highlight, editor: vscode.TextEditor): void {
+  // We need to track the active decorations for this file
+  const filePath = editor.document.uri.fsPath;
+  
+  // Mark this highlight as no longer applied
+  const appliedSet = appliedHighlights.get(filePath);
+  if (appliedSet) {
+    appliedSet.delete(highlight.id);
+  }
+  
+  // We don't have a direct way to know which decoration belongs to which highlight
+  // So we'll need to clear all decorations and re-apply the ones that should remain visible
+  
+  // Store which highlights were applied before clearing
+  const appliedIds = new Set<string>(appliedSet || []);
+  
+  // Remove the current highlight from the set of applied highlights
+  appliedIds.delete(highlight.id);
+  
+  // Clear all decorations
+  const decorations = activeDecorations.get(filePath) || [];
+  decorations.forEach(decoration => decoration.dispose());
+  activeDecorations.set(filePath, []);
+  
+  // Re-apply only the highlights that should remain visible
+  const fileHighlightsList = fileHighlights[filePath] || [];
+  for (const h of fileHighlightsList) {
+    if (appliedIds.has(h.id)) {
+      // We don't want to wait for this to complete, so don't use await
+      applyHighlightWithoutTracking(h, editor);
+    }
+  }
+  
+  // Make sure our tracking reflects what's actually shown
+  appliedHighlights.set(filePath, appliedIds);
+  
+  // Show message
+  showTemporaryMessage(`Cleared highlight: "${highlight.name}"`);
+}
+
 /**
  * Clear all highlight decorations in the editor
  * @param editor The text editor to clear decorations from
@@ -89,8 +133,22 @@ export function clearHighlights(editor?: vscode.TextEditor): void {
   // Clear the stored decorations for this file
   activeDecorations.set(filePath, []);
   
+  // Clear the tracking for applied highlights
+  appliedHighlights.set(filePath, new Set<string>());
+  
   // Show message
   showTemporaryMessage('Highlights cleared');
+}
+
+/**
+ * Check if a highlight is currently applied
+ * @param highlight The highlight to check
+ * @returns true if the highlight is currently applied
+ */
+export function isHighlightApplied(highlight: Highlight): boolean {
+  const filePath = highlight.filePath;
+  const appliedSet = appliedHighlights.get(filePath);
+  return appliedSet ? appliedSet.has(highlight.id) : false;
 }
 
 /**
@@ -147,6 +205,12 @@ export async function applyHighlight(highlight: Highlight, editor?: vscode.TextE
   }
   activeDecorations.get(filePath)?.push(decorationType);
   
+  // Track that this highlight is now applied
+  if (!appliedHighlights.has(filePath)) {
+    appliedHighlights.set(filePath, new Set<string>());
+  }
+  appliedHighlights.get(filePath)?.add(highlight.id);
+  
   // Calculate the range to reveal - use the first range in the highlight
   if (highlight.ranges.length > 0) {
     const firstRange = highlight.ranges[0];
@@ -164,6 +228,48 @@ export async function applyHighlight(highlight: Highlight, editor?: vscode.TextE
   
   // Show message
   showTemporaryMessage(`Applied highlight: "${highlight.name}"`);
+}
+
+/**
+ * Apply a highlight to an editor without updating tracking
+ * Used internally for re-applying highlights after clearing one
+ * @param highlight The highlight to apply
+ * @param editor The editor to apply the highlight to
+ */
+function applyHighlightWithoutTracking(highlight: Highlight, editor: vscode.TextEditor): void {
+  // Get configuration
+  const config = vscode.workspace.getConfiguration('presentationTools');
+  const defaultColor = config.get('defaultHighlightColor', 'rgba(255, 255, 0, 0.3)');
+  
+  // Create decoration type
+  const decorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: highlight.color || defaultColor,
+    isWholeLine: false
+  });
+  
+  // Convert highlight ranges to VS Code ranges
+  const decorationOptions: vscode.DecorationOptions[] = highlight.ranges.map(range => {
+    return {
+      range: new vscode.Range(
+        new vscode.Position(range.startLine, range.startCharacter),
+        new vscode.Position(range.endLine, range.endCharacter)
+      ),
+      hoverMessage: highlight.name
+    };
+  });
+  
+  // Apply the decoration
+  editor.setDecorations(decorationType, decorationOptions);
+  
+  // Store the decoration so we can clear it later
+  const filePath = editor.document.uri.fsPath;
+  if (!activeDecorations.has(filePath)) {
+    activeDecorations.set(filePath, []);
+  }
+  activeDecorations.get(filePath)?.push(decorationType);
+  
+  // Note: We don't update the appliedHighlights tracking data here
+  // because we assume the calling function handles that
 }
 
 /**

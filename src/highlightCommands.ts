@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { Highlight, fileHighlights, clearHighlights, applyHighlight, createHighlightFromSelection } from './highlightUtils';
+import { Highlight, fileHighlights, clearHighlights, applyHighlight, createHighlightFromSelection, clearSingleHighlightFromEditor } from './highlightUtils';
 import { showTemporaryMessage } from './utils';
 import { HighlightGroup, HighlightProvider } from './highlightProvider';
 
@@ -117,12 +117,41 @@ export function registerHighlightCommands(
   
   // Apply highlight command
   const applyHighlightCmd = vscode.commands.registerCommand('presentationTools.applyHighlight', (highlight: Highlight) => {
-    applyHighlight(highlight);
+    applyHighlight(highlight).then(() => {
+      // Refresh the tree view to update UI state after applying highlight
+      highlightProvider.refresh();
+    });
   });
   
   // Clear highlights command
   const clearHighlightsCmd = vscode.commands.registerCommand('presentationTools.clearHighlights', () => {
     clearHighlights();
+    // Refresh the tree view to update UI state
+    highlightProvider.refresh();
+  });
+  
+  // Clear single highlight command
+  const clearSingleHighlightCmd = vscode.commands.registerCommand('presentationTools.clearSingleHighlight', (highlight: Highlight) => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+    
+    // Make sure we're in the right file
+    if (editor.document.uri.fsPath !== highlight.filePath) {
+      vscode.workspace.openTextDocument(highlight.filePath).then(document => {
+        vscode.window.showTextDocument(document).then(editor => {
+          clearSingleHighlightFromEditor(highlight, editor);
+          // Refresh the tree view to update the UI state
+          highlightProvider.refresh();
+        });
+      });
+    } else {
+      clearSingleHighlightFromEditor(highlight, editor);
+      // Refresh the tree view to update the UI state
+      highlightProvider.refresh();
+    }
   });
   
   // Delete highlight command
@@ -387,6 +416,9 @@ export function registerHighlightCommands(
     }
     
     showTemporaryMessage(`Applied all highlights from group "${group.label}"`);
+    
+    // Refresh the tree view to update UI state
+    highlightProvider.refresh();
   });
 
   // Register all commands
@@ -394,6 +426,7 @@ export function registerHighlightCommands(
     saveHighlightCmd,
     applyHighlightCmd,
     clearHighlightsCmd,
+    clearSingleHighlightCmd,
     deleteHighlightCmd,
     deleteAllHighlightsCmd,
     exportHighlightsCmd,

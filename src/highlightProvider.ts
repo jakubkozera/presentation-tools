@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Highlight, fileHighlights, groupHighlights } from './highlightUtils';
+import { Highlight, fileHighlights, groupHighlights, isHighlightApplied } from './highlightUtils';
 
 // Types to represent the tree structure
 export type HighlightTreeItem = HighlightGroup | Highlight;
@@ -58,7 +58,11 @@ export class HighlightProvider implements vscode.TreeDataProvider<HighlightTreeI
       
       item.tooltip = new Date(highlight.timestamp).toLocaleString() + 
         `\nFile: ${highlight.fileName}\nPath: ${highlight.filePath}`;
-      item.contextValue = 'highlight';
+      
+      // Set different context values based on whether the highlight is applied
+      // This allows us to conditionally show the clear button only for applied highlights
+      const isApplied = isHighlightApplied(highlight);
+      item.contextValue = isApplied ? 'highlightApplied' : 'highlight';
       
       // Add a direct command to instantly apply the highlight when clicking on the tree item
       item.command = {
