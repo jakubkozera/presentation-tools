@@ -207,14 +207,8 @@ export function registerHighlightCommands(
 
   // Export highlights command
   const exportHighlightsCmd = vscode.commands.registerCommand('presentationTools.exportHighlights', async () => {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showErrorMessage('No active editor found');
-      return;
-    }
-    
-    const filePath = editor.document.uri.fsPath;
-    if (!fileHighlights[filePath] || fileHighlights[filePath].length === 0) {
+    // Check if there are any highlights to export
+    if (Object.keys(fileHighlights).length === 0) {
       vscode.window.showErrorMessage('No highlights to export');
       return;
     }
@@ -226,11 +220,19 @@ export function registerHighlightCommands(
     
     if (folderUri) {
       try {
+        // Export all highlights from all files
         fs.writeFileSync(
           folderUri.fsPath,
-          JSON.stringify(fileHighlights[filePath], null, 2)
+          JSON.stringify(fileHighlights, null, 2)
         );
-        vscode.window.showInformationMessage(`Highlights exported to ${folderUri.fsPath}`);
+        
+        // Count total highlights for the message
+        let totalHighlights = 0;
+        for (const filePath in fileHighlights) {
+          totalHighlights += fileHighlights[filePath].length;
+        }
+        
+        vscode.window.showInformationMessage(`Exported ${totalHighlights} highlights from ${Object.keys(fileHighlights).length} files to ${folderUri.fsPath}`);
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to export highlights: ${error}`);
       }
@@ -393,24 +395,7 @@ export function registerHighlightCommands(
       return;
     }
     
-    // First clear all highlights from all files
-    // Get a list of unique file paths in this group
-    const filePaths = new Set<string>();
-    group.highlights.forEach(h => filePaths.add(h.filePath));
-    
-    // Clear highlights from each file
-    for (const filePath of filePaths) {
-      try {
-        // Try to open the file if it's not already open
-        const document = await vscode.workspace.openTextDocument(filePath);
-        const editor = await vscode.window.showTextDocument(document);
-        clearHighlights(editor);
-      } catch (error) {
-        vscode.window.showWarningMessage(`Could not clear highlights in file ${filePath}: ${error}`);
-      }
-    }
-    
-    // Apply all highlights in the group
+    // Apply all highlights in the group without clearing other highlights
     for (const highlight of group.highlights) {
       await applyHighlight(highlight);
     }
