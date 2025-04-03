@@ -73,12 +73,20 @@ You can customize the extension behavior:
 3. Adjust the typing speed and other available options
 
 ## Keyboard Shortcuts
-You can set up keyboard shortcuts for commonly used features:
-- Save Snapshot
-- Load Snapshot
-- Save Highlight
-- Apply/Clear Highlights
-- Navigate to Next Highlight
+The extension comes with the following default keyboard shortcuts:
+
+| Feature | Windows/Linux | macOS |
+|---------|--------------|-------|
+| Save Code Snapshot | `Ctrl+Shift+S` | `Cmd+Shift+S` |
+| Load Next Snapshot | `Ctrl+Shift+N` | `Cmd+Shift+N` |
+| Save Code Highlight | `Ctrl+Shift+H` | `Cmd+Shift+H` |
+| Load Next Highlight | `Ctrl+Shift+M` | `Cmd+Shift+M` |
+| Clear All Highlights | `Ctrl+Shift+C` | `Cmd+Shift+C` |
+
+You can customize these shortcuts in VS Code:
+1. Go to File > Preferences > Keyboard Shortcuts
+2. Search for "Presentation Tools"
+3. Click on the shortcut you want to change and press your desired key combination
 
 ## Requirements
 - VS Code 1.60.0 or higher
