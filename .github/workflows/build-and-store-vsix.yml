@@ -31,14 +31,14 @@ jobs:
 
       - name: Get Extension Version
         id: get_version
-        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Get Commit Hash
         id: get_commit_hash
-        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Upload VSIX as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: presentation-tools-${{ steps.get_version.outputs.version }}-${{ steps.get_commit_hash.outputs.hash }}
           path: "*.vsix"
@@ -47,11 +47,11 @@ jobs:
       - name: Create or Update Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: nightly
-          name: "Nightly Build"
+          tag_name: dev-build
+          name: "Development Build"
           files: "*.vsix"
           body: |
-            Nightly build of Presentation Tools extension.
+            Development build of Presentation Tools extension.
             Version: ${{ steps.get_version.outputs.version }}
             Commit: ${{ steps.get_commit_hash.outputs.hash }}
             Build date: ${{ github.event.head_commit.timestamp }}
