@@ -3,7 +3,7 @@ name: Build and Store VSIX
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
