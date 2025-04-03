@@ -2,7 +2,7 @@
   "name": "presentation-tools",
   "displayName": "Presentation Tools",
   "description": "Save and restore code snapshots and highlights for smooth presentations",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.60.0"
   },
