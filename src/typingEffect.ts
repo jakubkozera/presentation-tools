@@ -175,15 +175,6 @@ export async function applyDiffWithTyping(
       }
     }
 
-    // Ensure editor shows the final position
-    if (editor.document.lineCount > 0) {
-      editor.revealRange(
-        new vscode.Range(
-          editor.document.positionAt(0),
-          editor.document.positionAt(editor.document.getText().length)
-        )
-      );
-    }
   } finally {
     // Restore formatting settings if we were able to save them earlier
     if (originalSettings) {
