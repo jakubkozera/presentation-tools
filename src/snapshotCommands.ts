@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { Snapshot, fileSnapshots, showTemporaryMessage } from './utils';
+import { Snapshot, fileSnapshots, showTemporaryMessage, lastLoadedSnapshot, setLastLoadedSnapshot } from './utils';
 import { applyDiffWithTyping } from './typingEffect';
 import { SnapshotGroup, SnapshotProvider } from './snapshotProvider';
 
@@ -132,6 +132,9 @@ export function registerSnapshotCommands(
           edit.replace(editor.document.uri, fullRange, snapshot.content);
           await vscode.workspace.applyEdit(edit);
           
+          // Track this snapshot as the last loaded one
+          setLastLoadedSnapshot(editor.document.uri.fsPath, snapshot.id);
+          
           // Use temporary message for loading notification
           showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
         }
@@ -157,6 +160,9 @@ export function registerSnapshotCommands(
     );
     edit.replace(editor.document.uri, fullRange, snapshot.content);
     await vscode.workspace.applyEdit(edit);
+    
+    // Track this snapshot as the last loaded one
+    setLastLoadedSnapshot(editor.document.uri.fsPath, snapshot.id);
     
     // Use temporary message for loading notification
     showTemporaryMessage(`Loaded snapshot: "${snapshot.description}"`);
@@ -391,6 +397,75 @@ export function registerSnapshotCommands(
     }
   });
 
+  // Load next snapshot command
+  const loadNextSnapshotCmd = vscode.commands.registerCommand('presentationTools.loadNextSnapshot', async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage('No active editor found');
+      return;
+    }
+    
+    const filePath = editor.document.uri.fsPath;
+    const snapshots = fileSnapshots[filePath];
+    
+    if (!snapshots || snapshots.length === 0) {
+      vscode.window.showInformationMessage('No snapshots available for this file');
+      return;
+    }
+    
+    // Find the index of the last loaded snapshot
+    let nextIndex = 0;
+    
+    if (lastLoadedSnapshot && lastLoadedSnapshot.filePath === filePath) {
+      const currentIndex = snapshots.findIndex(s => s.id === lastLoadedSnapshot!.snapshotId);
+      if (currentIndex !== -1) {
+        // Move to the next snapshot (wrap around if at the end)
+        nextIndex = (currentIndex + 1) % snapshots.length;
+      }
+    }
+    
+    // Get the next snapshot
+    const nextSnapshot = snapshots[nextIndex];
+    
+    // Load the snapshot with typing effect
+    const config = vscode.workspace.getConfiguration('presentationTools');
+    const typingSpeed = config.get('typingSpeed', 10); // Characters per second
+    
+    vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: `Loading next snapshot: "${nextSnapshot.description}"`,
+      cancellable: true
+    }, async (progress, token) => {
+      token.onCancellationRequested(() => {
+        vscode.window.showInformationMessage('Snapshot loading cancelled');
+      });
+      
+      try {
+        const currentContent = editor.document.getText();
+        await applyDiffWithTyping(editor, currentContent, nextSnapshot.content, typingSpeed, token);
+        
+        // Only apply the final edit if not cancelled
+        if (!token.isCancellationRequested) {
+          const edit = new vscode.WorkspaceEdit();
+          const fullRange = new vscode.Range(
+            editor.document.positionAt(0),
+            editor.document.positionAt(editor.document.getText().length)
+          );
+          edit.replace(editor.document.uri, fullRange, nextSnapshot.content);
+          await vscode.workspace.applyEdit(edit);
+          
+          // Track this as the last loaded snapshot
+          setLastLoadedSnapshot(filePath, nextSnapshot.id);
+          
+          // Use temporary message for loading notification
+          showTemporaryMessage(`Loaded snapshot: "${nextSnapshot.description}"`);
+        }
+      } catch (err) {
+        vscode.window.showErrorMessage(`Error loading snapshot: ${err}`);
+      }
+    });
+  });
+
   // Register all commands
   context.subscriptions.push(
     saveSnapshotCmd,
@@ -401,6 +476,7 @@ export function registerSnapshotCommands(
     exportSnapshotsCmd,
     importSnapshotsCmd,
     changeSnapshotGroupCmd,
-    deleteGroupCmd
+    deleteGroupCmd,
+    loadNextSnapshotCmd
   );
 }

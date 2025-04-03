@@ -16,6 +16,18 @@ export interface FileSnapshots {
 // In-memory storage for snapshots - shared across the extension
 export const fileSnapshots: FileSnapshots = {};
 
+// Track the last loaded snapshot to support navigation
+export let lastLoadedSnapshot: { filePath: string, snapshotId: string } | null = null;
+
+/**
+ * Set the last loaded snapshot for navigation
+ * @param filePath The file path of the snapshot
+ * @param snapshotId The ID of the snapshot
+ */
+export function setLastLoadedSnapshot(filePath: string, snapshotId: string): void {
+  lastLoadedSnapshot = { filePath, snapshotId };
+}
+
 /**
  * Groups snapshots by their group property while preserving their original order
  * @param snapshots Array of snapshots to group

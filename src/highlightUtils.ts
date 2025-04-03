@@ -65,11 +65,23 @@ export function groupHighlights(highlights: Highlight[]): Map<string, Highlight[
   return groups;
 }
 
-// Store active decorations
+// Track active decorations
 const activeDecorations = new Map<string, vscode.TextEditorDecorationType[]>();
 
 // Track which highlights are currently applied (by id)
 const appliedHighlights = new Map<string, Set<string>>();
+
+// Track the last applied highlight for navigation
+export let lastAppliedHighlight: { filePath: string, highlightId: string } | null = null;
+
+/**
+ * Set the last applied highlight for navigation
+ * @param filePath The file path of the highlight
+ * @param highlightId The ID of the highlight
+ */
+export function setLastAppliedHighlight(filePath: string, highlightId: string): void {
+  lastAppliedHighlight = { filePath, highlightId };
+}
 
 // Function to clear a single highlight from an editor
 export function clearSingleHighlightFromEditor(highlight: Highlight, editor: vscode.TextEditor): void {
@@ -210,6 +222,9 @@ export async function applyHighlight(highlight: Highlight, editor?: vscode.TextE
     appliedHighlights.set(filePath, new Set<string>());
   }
   appliedHighlights.get(filePath)?.add(highlight.id);
+  
+  // Set the last applied highlight for navigation
+  setLastAppliedHighlight(filePath, highlight.id);
   
   // Calculate the range to reveal - use the first range in the highlight
   if (highlight.ranges.length > 0) {

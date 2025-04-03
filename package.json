@@ -22,6 +22,8 @@
     "onCommand:presentationTools.deleteSnapshotGroup",
     "onCommand:presentationTools.showGroupDiff",
     "onCommand:presentationTools.loadGroupWithTypingEffect",
+    "onCommand:presentationTools.loadNextSnapshot",
+    "onCommand:presentationTools.loadNextHighlight",
     "onCommand:presentationTools.saveHighlight",
     "onCommand:presentationTools.applyHighlight",
     "onCommand:presentationTools.clearHighlights",
@@ -61,6 +63,10 @@
         "command": "presentationTools.loadSnapshot",
         "title": "Load Snapshot",
         "icon": "$(play)"
+      },
+      {
+        "command": "presentationTools.loadNextSnapshot",
+        "title": "Presentation: Load Next Snapshot"
       },
       {
         "command": "presentationTools.deleteSnapshot",
@@ -120,6 +126,10 @@
         "command": "presentationTools.applyHighlight",
         "title": "Apply Highlight",
         "icon": "$(paintcan)"
+      },
+      {
+        "command": "presentationTools.loadNextHighlight",
+        "title": "Presentation: Load Next Highlight"
       },
       {
         "command": "presentationTools.clearSingleHighlight",
@@ -320,10 +330,22 @@
         "when": "editorTextFocus"
       },
       {
+        "command": "presentationTools.loadNextSnapshot",
+        "key": "ctrl+shift+n",
+        "mac": "cmd+shift+n",
+        "when": "editorTextFocus"
+      },
+      {
         "command": "presentationTools.saveHighlight",
         "key": "ctrl+shift+h",
         "mac": "cmd+shift+h",
         "when": "editorHasSelection && editorTextFocus"
+      },
+      {
+        "command": "presentationTools.loadNextHighlight", 
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m",
+        "when": "editorTextFocus"
       },
       {
         "command": "presentationTools.clearHighlights",

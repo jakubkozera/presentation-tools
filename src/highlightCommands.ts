@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { Highlight, fileHighlights, clearHighlights, applyHighlight, createHighlightFromSelection, clearSingleHighlightFromEditor, isHighlightApplied } from './highlightUtils';
+import { Highlight, fileHighlights, clearHighlights, applyHighlight, createHighlightFromSelection, clearSingleHighlightFromEditor, isHighlightApplied, lastAppliedHighlight, setLastAppliedHighlight } from './highlightUtils';
 import { showTemporaryMessage } from './utils';
 import { HighlightGroup, HighlightProvider } from './highlightProvider';
 
@@ -36,8 +36,10 @@ export function registerHighlightCommands(
 
     // Get existing groups to offer as quick picks
     const existingGroups = new Set<string>();
-    if (fileHighlights[filePath]) {
-      fileHighlights[filePath].forEach(highlight => {
+    
+    // Collect groups from all files, not just the current file
+    for (const path in fileHighlights) {
+      fileHighlights[path].forEach(highlight => {
         if (highlight.group) {
           existingGroups.add(highlight.group);
         }
@@ -180,27 +182,36 @@ export function registerHighlightCommands(
       return;
     }
     
-    const filePath = editor.document.uri.fsPath;
-    if (!fileHighlights[filePath] || fileHighlights[filePath].length === 0) {
+    // Count total highlights across all files
+    let totalHighlightCount = 0;
+    const totalFileCount = Object.keys(fileHighlights).length;
+    
+    for (const filePath in fileHighlights) {
+      totalHighlightCount += fileHighlights[filePath].length;
+    }
+    
+    if (totalHighlightCount === 0) {
       vscode.window.showInformationMessage('No highlights to delete');
       return;
     }
     
-    const highlightCount = fileHighlights[filePath].length;
-    
     // Show confirmation dialog with the number of highlights that will be deleted
-    const confirmMessage = `Are you sure you want to delete all ${highlightCount} highlights for this file? This action cannot be undone.`;
+    const confirmMessage = `Are you sure you want to delete all ${totalHighlightCount} highlights from all ${totalFileCount} files? This action cannot be undone.`;
     const confirmOptions = ['Delete All Highlights', 'Cancel'];
     
     const result = await vscode.window.showWarningMessage(confirmMessage, ...confirmOptions);
     
     if (result === confirmOptions[0]) {
       // User confirmed deletion
-      fileHighlights[filePath] = [];
-      showTemporaryMessage(`Deleted all ${highlightCount} highlights`);
+      // Clear all highlights from all files
+      for (const filePath in fileHighlights) {
+        fileHighlights[filePath] = [];
+      }
+      
+      showTemporaryMessage(`Deleted all ${totalHighlightCount} highlights from ${totalFileCount} files`);
       highlightProvider.refresh();
       
-      // Also clear active highlights from editor
+      // Also clear active highlights from current editor
       clearHighlights(editor);
     }
   });
@@ -251,21 +262,41 @@ export function registerHighlightCommands(
     if (fileUri && fileUri.length > 0) {
       try {
         const content = fs.readFileSync(fileUri[0].fsPath, 'utf8');
-        const importedHighlights = JSON.parse(content) as Highlight[];
+        const importedData = JSON.parse(content);
         
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-          vscode.window.showErrorMessage('No active editor found');
+        // Check if the imported data is in the expected format (object with file paths as keys)
+        if (typeof importedData !== 'object' || Array.isArray(importedData)) {
+          vscode.window.showErrorMessage('Invalid highlights file format');
           return;
         }
         
-        const filePath = editor.document.uri.fsPath;
-        if (!fileHighlights[filePath]) {
-          fileHighlights[filePath] = [];
+        // Count how many highlights we're importing
+        let totalImportedHighlights = 0;
+        let totalFiles = 0;
+        
+        // Merge the imported highlights with existing ones
+        for (const filePath in importedData) {
+          if (Array.isArray(importedData[filePath])) {
+            if (!fileHighlights[filePath]) {
+              fileHighlights[filePath] = [];
+            }
+            
+            // Add only highlights that don't already exist (based on id)
+            const existingIds = new Set(fileHighlights[filePath].map(h => h.id));
+            const newHighlights = importedData[filePath].filter(h => !existingIds.has(h.id));
+            
+            fileHighlights[filePath].push(...newHighlights);
+            totalImportedHighlights += newHighlights.length;
+            totalFiles++;
+          }
         }
         
-        fileHighlights[filePath] = [...fileHighlights[filePath], ...importedHighlights];
-        vscode.window.showInformationMessage(`Imported ${importedHighlights.length} highlights`);
+        if (totalImportedHighlights > 0) {
+          vscode.window.showInformationMessage(`Imported ${totalImportedHighlights} highlights from ${totalFiles} files`);
+        } else {
+          vscode.window.showInformationMessage('No new highlights were imported');
+        }
+        
         highlightProvider.refresh();
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to import highlights: ${error}`);
@@ -288,11 +319,15 @@ export function registerHighlightCommands(
 
     // Get existing groups to offer as quick picks
     const existingGroups = new Set<string>();
-    fileHighlights[filePath].forEach(h => {
-      if (h.group) {
-        existingGroups.add(h.group);
-      }
-    });
+    
+    // Collect groups from all files, not just the current file
+    for (const path in fileHighlights) {
+      fileHighlights[path].forEach(h => {
+        if (h.group) {
+          existingGroups.add(h.group);
+        }
+      });
+    }
 
     // Convert Set to array of quick pick items
     const groupQuickPicks = Array.from(existingGroups).map(group => ({
@@ -457,6 +492,55 @@ export function registerHighlightCommands(
     highlightProvider.refresh();
   });
 
+  /**
+   * Get all highlights from all files in a single sorted list
+   * @returns Array of all highlights sorted by timestamp
+   */
+  function getAllHighlightsSorted(): Highlight[] {
+    // Collect all highlights from all files
+    const allHighlights: Highlight[] = [];
+    
+    for (const filePath in fileHighlights) {
+      allHighlights.push(...fileHighlights[filePath]);
+    }
+    
+    // Sort highlights by timestamp (oldest first)
+    return allHighlights.sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  // Load next highlight command
+  const loadNextHighlightCmd = vscode.commands.registerCommand('presentationTools.loadNextHighlight', async () => {
+    // Get all highlights from all files
+    const allHighlights = getAllHighlightsSorted();
+    
+    if (allHighlights.length === 0) {
+      vscode.window.showInformationMessage('No highlights available');
+      return;
+    }
+    
+    // Find the index of the last applied highlight
+    let nextIndex = 0;
+    
+    if (lastAppliedHighlight) {
+      const currentIndex = allHighlights.findIndex(h => 
+        h.id === lastAppliedHighlight!.highlightId && 
+        h.filePath === lastAppliedHighlight!.filePath
+      );
+      
+      if (currentIndex !== -1) {
+        // Move to the next highlight (wrap around if at the end)
+        nextIndex = (currentIndex + 1) % allHighlights.length;
+      }
+    }
+    
+    // Apply the next highlight
+    const nextHighlight = allHighlights[nextIndex];
+    await applyHighlight(nextHighlight);
+    
+    // Refresh the tree view to update UI state
+    highlightProvider.refresh();
+  });
+
   // Register all commands
   context.subscriptions.push(
     saveHighlightCmd,
@@ -470,6 +554,7 @@ export function registerHighlightCommands(
     changeHighlightGroupCmd,
     deleteGroupCmd,
     applyGroupHighlightsCmd,
-    clearGroupHighlightsCmd
+    clearGroupHighlightsCmd,
+    loadNextHighlightCmd
   );
 }
