@@ -1,0 +1,60 @@
+name: Build and Store VSIX
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-and-store:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Package Extension
+        run: |
+          npm install -g @vscode/vsce
+          vsce package
+
+      - name: Get Extension Version
+        id: get_version
+        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+
+      - name: Get Commit Hash
+        id: get_commit_hash
+        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+
+      - name: Upload VSIX as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: presentation-tools-${{ steps.get_version.outputs.version }}-${{ steps.get_commit_hash.outputs.hash }}
+          path: "*.vsix"
+          retention-days: 90
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: nightly
+          name: "Nightly Build"
+          files: "*.vsix"
+          body: |
+            Nightly build of Presentation Tools extension.
+            Version: ${{ steps.get_version.outputs.version }}
+            Commit: ${{ steps.get_commit_hash.outputs.hash }}
+            Build date: ${{ github.event.head_commit.timestamp }}
+          draft: false
+          prerelease: true
+          make_latest: false
