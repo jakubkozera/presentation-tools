@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:  # Allow manual triggering
 
+permissions:
+  contents: write  # This is needed to create releases
+
 jobs:
   build-and-store:
     runs-on: ubuntu-latest
@@ -57,4 +60,3 @@ jobs:
             Build date: ${{ github.event.head_commit.timestamp }}
           draft: false
           prerelease: true
-          make_latest: false
