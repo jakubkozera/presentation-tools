@@ -283,7 +283,7 @@ export function registerHighlightCommands(
             
             // Add only highlights that don't already exist (based on id)
             const existingIds = new Set(fileHighlights[filePath].map(h => h.id));
-            const newHighlights = importedData[filePath].filter(h => !existingIds.has(h.id));
+            const newHighlights = importedData[filePath].filter((h: any) => !existingIds.has(h.id));
             
             fileHighlights[filePath].push(...newHighlights);
             totalImportedHighlights += newHighlights.length;
