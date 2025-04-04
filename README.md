@@ -3,6 +3,65 @@
 ## Overview
 Presentation Tools is a VS Code extension that enhances your coding demonstrations and presentations by allowing you to create pre-defined snapshots of your code that can be recalled with a typewriter-like animation effect. It also provides powerful code highlighting features to help draw attention to specific parts of your code during presentations.
 
+## Demos
+
+### Snapshot Features
+
+#### Load Snapshots Typed in Zen Mode
+![Load Snapshots Typed in Zen Mode](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load%20snapshots%20typed%20zen%20mode.gif)
+Quickly recall your code snapshots with typewriter animation using keyboard shortcuts (CTRL + SHIFT + N) for distraction-free presentations.
+
+#### Load Snapshots Instantly
+![Load Snapshots Instantly](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load%20snapshots%20instantly.gif)
+Instantly switch between pre-defined code states without animation for quick demonstrations.
+
+#### Snapshots Diff and Load
+![Snapshots Diff and Load](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/snapshots%20diff%20and%20load.gif)
+Compare differences between snapshots before loading to understand changes between code states.
+
+#### Load Group Snapshots Typed
+![Load Group Snapshots Typed](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load%20group%20snapshots%20typed.gif)
+Apply multiple snapshots at once with typewriter animation for complex demonstrations.
+
+### Highlight Features
+
+#### Highlight Regions in Zen Mode
+![Highlight Regions in Zen Mode](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/highlight%20regions%20zen%20mode.gif)
+Focus audience attention on specific code regions using keyboard shortcuts (CTRL + SHIFT + M) for distraction-free presentations.
+
+#### Highlight Regions
+![Highlight Regions](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/highlight%20regions.gif)
+Create and apply color-coded highlights to draw attention to important code sections during your presentations.
+
+## Quick Start
+
+### Snapshots Quick Start
+
+#### Creating a Snapshot
+1. Open the file you want to capture
+2. Make the desired code changes
+3. Press `Ctrl+Shift+S` to save the current state as a snapshot
+4. Enter a name for your snapshot and press Enter
+
+#### Using a Snapshot
+1. Open the file where you want to load the snapshot
+2. Press `Ctrl+Shift+N` to navigate to the next snapshot
+3. Watch as your code transforms with a realistic typing effect
+4. For more options, use the Snapshots view in the sidebar to choose specific snapshots or loading methods
+
+### Highlights Quick Start
+
+#### Creating a Highlight
+1. Select the code you want to highlight
+2. Press `Ctrl+Shift+H` to save the current selection as a highlight
+3. Enter a name for your highlight
+4. Optionally select a color and/or assign it to a group
+
+#### Using a Highlight
+1. Press `Ctrl+Shift+M` to navigate to the next highlight
+2. To clear all active highlights, press `Ctrl+Shift+C`
+3. For more control, use the Highlights view in the sidebar to choose specific highlights or apply highlight groups
+
 ## Features
 - **Code Snapshots**: Save important states of your code to recall during presentations
 - **Typewriter Animation**: Simulate live coding with realistic typing animations
