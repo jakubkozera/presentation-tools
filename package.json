@@ -3,6 +3,12 @@
   "displayName": "Presentation Tools",
   "description": "Save and restore code snapshots and highlights for smooth presentations",
   "version": "0.2.2",
+  "publisher": "JakubKozera",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakubkozera/presentation-tools"
+  },
   "icon": "resources/icon.png",
   "engines": {
     "vscode": "^1.60.0"
