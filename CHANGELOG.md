@@ -4,6 +4,17 @@ All notable changes to the "presentation-tools" extension will be documented in 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.2.3] - 2025-04-04
+
+### Added
+- Manual workflow trigger for building and releasing
+- Improved extension categorization in VS Code Marketplace
+
+## [0.2.2]
+
+### Added
+- Bug fixes and performance improvements
+
 ## [0.2.1] 
 
 ### Added

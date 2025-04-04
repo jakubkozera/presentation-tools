@@ -2,7 +2,7 @@
   "name": "presentation-tools",
   "displayName": "Presentation Tools",
   "description": "Save and restore code snapshots and highlights for smooth presentations",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "JakubKozera",
   "license": "MIT",
   "repository": {
@@ -14,7 +14,9 @@
     "vscode": "^1.60.0"
   },
   "categories": [
-    "Other"
+    "Education",
+    "Formatters",
+    "Productivity"
   ],
   "activationEvents": [
     "onCommand:presentationTools.saveSnapshot",
