@@ -8,29 +8,29 @@ Presentation Tools is a VS Code extension that enhances your coding demonstratio
 ### Snapshot Features
 
 #### Load Snapshots Typed in Zen Mode
-![Load Snapshots Typed in Zen Mode](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load%20snapshots%20typed%20zen%20mode.gif)
+![Load Snapshots Typed in Zen Mode](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load-snapshots-typed-zen-mode.gif)
 Quickly recall your code snapshots with typewriter animation using keyboard shortcuts (CTRL + SHIFT + N) for distraction-free presentations.
 
 #### Load Snapshots Instantly
-![Load Snapshots Instantly](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load%20snapshots%20instantly.gif)
+![Load Snapshots Instantly](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load-snapshots-instantly.gif)
 Instantly switch between pre-defined code states without animation for quick demonstrations.
 
 #### Snapshots Diff and Load
-![Snapshots Diff and Load](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/snapshots%20diff%20and%20load.gif)
+![Snapshots Diff and Load](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/snapshots-diff-and-load.gif)
 Compare differences between snapshots before loading to understand changes between code states.
 
 #### Load Group Snapshots Typed
-![Load Group Snapshots Typed](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load%20group%20snapshots%20typed.gif)
+![Load Group Snapshots Typed](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/load-group-snapshots-typed.gif)
 Apply multiple snapshots at once with typewriter animation for complex demonstrations.
 
 ### Highlight Features
 
 #### Highlight Regions in Zen Mode
-![Highlight Regions in Zen Mode](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/highlight%20regions%20zen%20mode.gif)
+![Highlight Regions in Zen Mode](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/highlight-regions-zen-mode.gif)
 Focus audience attention on specific code regions using keyboard shortcuts (CTRL + SHIFT + M) for distraction-free presentations.
 
 #### Highlight Regions
-![Highlight Regions](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/highlight%20regions.gif)
+![Highlight Regions](https://raw.githubusercontent.com/jakubkozera/presentation-tools/master/resources/highlight-regions.gif)
 Create and apply color-coded highlights to draw attention to important code sections during your presentations.
 
 ## Quick Start
