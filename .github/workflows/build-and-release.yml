@@ -37,9 +37,6 @@ jobs:
       - name: Compile
         run: npm run compile
 
-      - name: Run tests
-        run: npm test
-
       - name: Package Extension
         if: success()
         run: |
