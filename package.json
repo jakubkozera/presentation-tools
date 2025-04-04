@@ -15,8 +15,7 @@
   },
   "categories": [
     "Education",
-    "Formatters",
-    "Productivity"
+    "Formatters"
   ],
   "activationEvents": [
     "onCommand:presentationTools.saveSnapshot",
