@@ -2,7 +2,7 @@
   "name": "presentation-tools",
   "displayName": "Presentation Tools",
   "description": "Save and restore code snapshots and highlights for smooth presentations",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "JakubKozera",
   "license": "MIT",
   "repository": {
